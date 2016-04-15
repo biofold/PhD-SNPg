@@ -87,6 +87,15 @@ def get_conservation(ichr,ipos,ucsc_dir,win=3,dbname='hg38.phyloP100way.bw',prog
 	return cons
 
 
+def get_phdsnp_input(ichr,ipos,ucsc_dir,win=3,dbfasta='hg38.2bit',dbpp1='hg38.phyloP7way.bw',dbpp2='hg38.phyloP100way.bw',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+	nuc,seq=get_sequence(ichr,ipos,ucsc_dir,win,dbfasta,fprog)
+        seq_input=get_seqinput(seq,wt+str(win+1)+nw)
+        cons_input1=get_conservation(ichr,ipos,ucsc_dir,win,dbpp1,cprog)
+        cons_input2=get_conservation(ichr,ipos,ucsc_dir,win,dbpp2,cprog)
+	return nuc,seq,seq_input,cons_input1,cons_input2
+
+
+
 def get_options():
 	import optparse
 	desc = 'Script for running ContrastRank scoring pipeline'
@@ -109,7 +118,9 @@ if __name__ == '__main__':
 		wt=sys.argv[3]
 		nw=sys.argv[4]
 		win=3
-		nuc,seq=get_sequence(ichr,ipos,ucsc_dir)
-		seq_input=get_seqinput(seq,wt+str(win+1)+nw)
-		cons_input=get_conservation(ichr,ipos,ucsc_dir)
-		print seq_input, cons_input
+		(nuc,seq,seq_input,cons_input1,cons_input2)=get_phdsnp_input(ichr,ipos,ucsc_dir)
+		#nuc,seq=get_sequence(ichr,ipos,ucsc_dir)
+		#seq_input=get_seqinput(seq,wt+str(win+1)+nw)
+		#cons_input7=get_conservation(ichr,ipos,ucsc_dir,3,'hg38.phyloP7way.bw')
+		#cons_input100=get_conservation(ichr,ipos,ucsc_dir,3,'hg38.phyloP100way.bw')
+		print nuc, seq, seq_input, cons_input1, cons_input2
