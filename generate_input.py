@@ -197,11 +197,10 @@ if __name__ == '__main__':
 	(outfile,modfile,hg,fasta,dbpp1,dbpp2)=opts
 	if len(args)>1:
 		ichr=sys.argv[1]
-		ipos=int(sys.argv[2])
+		ipos=int(sys.argv[2])-1
 		wt=sys.argv[3]
 		nw=sys.argv[4]
 		win=3
-		if hg=='hg19':ipos=ipos-1
 		if modfile=='':
 			(nuc,seq,seq_input,cons_input1,cons_input2)=get_phdsnp_input(ichr,ipos,wt,nw,ucsc_dir,win,fasta,dbpp1,dbpp2)
 			print nuc, seq, '\t'.join([str(i) for i in seq_input]), '\t'.join([str(i) for i in cons_input1]), '\t'.join([str(i) for i in cons_input2])
