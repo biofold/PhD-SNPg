@@ -104,7 +104,7 @@ def get_options():
 	global hg, coord, vcf, fpass, win
 	import optparse
 	desc = 'Script for scoring single nucleotide variants'
-	parser = optparse.OptionParser("usage: variant_file", description=desc)
+	parser = optparse.OptionParser("usage: %prog variant_file", description=desc)
 	parser.add_option('-m','--mod-file', action='store', type='string', dest='mfile', help='Model file')
 	parser.add_option('-g','--genome', action='store', type='string', dest='hg', default='hg38', help='Genome version')
 	parser.add_option('-v','--verbose', action='store_true', dest='ver', default=False, help='Verbose mode')
@@ -162,5 +162,5 @@ if __name__ == '__main__':
 				print >> sys.stderr(),'ERROR: Input file not found',namefile
 				sys.exit(1)
 			make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win,'\t',fasta,dbpp1,dbpp2)
-
-
+	else:
+		print 'predict_variants.py variant_file'
