@@ -90,13 +90,20 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfast
 		if cons_input1==[]: cons_input1=[0.0 for i in range(2*win+1)]
 		X=[ seq_input + cons_input1+ cons_input2 ]
 		y_pred=prediction(X,model)
+		if y_pred=='NA':
+			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
+			print line+'\tNA'
+			continue
 		print line+'\t'+'%.4f' %y_pred[0]
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
 	return 
 
 
 def prediction(X,model):
-        y_pred = model.predict_proba(X)[:, 1]
+	try:
+	        y_pred = model.predict_proba(X)[:, 1]
+	except:
+		y_pred = 'NA'
         return y_pred		
 
 
