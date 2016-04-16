@@ -55,9 +55,13 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfast
 			continue 	
 		v=line.rstrip().split(s)
 		if len(v)<4:
+			print >> sys.stderr,'WARNING: Incorrect line ',c	
 			print line
                         continue
-		if len(v)<4: print >> sys.stderr,'WARNING: Incorrect line ',c,line.rstrip()
+		if len(wt)>1 or len(nw)>1 or 'ACGT'.find(wt)==-1 or 'ACGT'.find(nw)==-1 or wt==nw:
+			print line+'\tNA'
+			#print '\t'.join(str(i) for i in [ichr,pos,wt,nw,'NA'])
+			continue
 		if vcf:
 			if fpass and len(v)>6 and v[6]!='PASS':
 				print line+'\tNA'
@@ -65,10 +69,6 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfast
 			(ichr,pos,rs,wt,nw)=tuple(v[:5])
 		else:
 			(ichr,pos,wt,nw)=tuple(v[:4])
-		if len(wt)>1 or len(nw)>1 or 'ACGT'.find(wt)==-1 or 'ACGT'.find(nw)==-1 or wt==nw:
-			print line+'\tNA'
-			#print '\t'.join(str(i) for i in [ichr,pos,wt,nw,'NA'])
-			continue
 		nchr=ichr
 		if nchr.find('chr')==-1: nchr='chr'+ichr
 		ipos=int(pos)
@@ -96,6 +96,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfast
 			continue
 		print line+'\t'+'%.4f' %y_pred[0]
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
+		c=c+1
 	return 
 
 
