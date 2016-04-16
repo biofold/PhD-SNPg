@@ -4,8 +4,15 @@ from commands import getstatusoutput
 from sklearn.externals import joblib
 
 def global_vars():
-	global prog_dir, ucsc_dir, verbose
+	global prog_dir, ucsc_dir, verbose, hg19, hg38
 	verbose = False
+	hg19={}
+	hg19['fasta']='hg19.2bit'
+	hg19['phylop']=['hg19.phyloP46way.primate.bw','hg19.phyloP46way.placental.bw', \
+			'hg19.100way.phyloP100way.bw']
+	hg38={}
+	hg38['fasta']='hg38.2bit'
+	hg38['phylop']=['hg38.phyloP7way.bw','hg38.phyloP20way.bw','hg38.phyloP100way.bw']
 	prog_dir = os.path.dirname(os.path.abspath(__file__))
 	ucsc_dir = prog_dir+'/ucsc'
 	return
@@ -164,11 +171,22 @@ def get_options():
         #parser.add_option('-t', '--threshold',action='store',type='float',dest='th', default=0.005, help='1000Genomes allele frequency filter')
 	parser.add_option('-o','--output', action='store', type='string', dest='outfile', help='Output file')
 	parser.add_option('-m','--mod-file', action='store', type='string', dest='mfile', help='Model file')
+	parser.add_option('-g','--genome', action='store', type='string', dest='hg', help='Genome version')
 	(options, args) = parser.parse_args()
 	modfile=''
 	outfile=''
+	hg='hg38'
 	if options.mfile: modfile=options.mfile
-	opts=(outfile,modfile)
+	if options.hg.lower()=='hg19': hg='hg19'
+	if hg=='hg19':
+		fasta=hg19['fasta']
+		dbpp1=hg19['phylop'][0]
+		dbpp2=hg19['phylop'][2]
+	else:
+		fasta=hg38['fasta']
+		dbpp1=hg38['phylop'][0]
+		dbpp2=hg38['phylop'][2]
+	opts=(outfile,modfile,hg,fasta,dbpp1,dbpp2)
 	return args,opts
 
 
@@ -176,16 +194,17 @@ def get_options():
 if __name__ == '__main__':
 	global_vars()
 	args,opts=get_options()
-	(outfile,modfile)=opts
+	(outfile,modfile,hg,fasta,dbpp1,dbpp2)=opts
 	if len(args)>1:
 		ichr=sys.argv[1]
 		ipos=int(sys.argv[2])
 		wt=sys.argv[3]
 		nw=sys.argv[4]
 		win=3
+		if hg=='hg19':ipos=ipos-1
 		if modfile=='':
-			(nuc,seq,seq_input,cons_input1,cons_input2)=get_phdsnp_input(ichr,ipos,wt,nw,ucsc_dir)
+			(nuc,seq,seq_input,cons_input1,cons_input2)=get_phdsnp_input(ichr,ipos,wt,nw,ucsc_dir,win,fasta,dbpp1,dbpp2)
 			print nuc, seq, '\t'.join([str(i) for i in seq_input]), '\t'.join([str(i) for i in cons_input1]), '\t'.join([str(i) for i in cons_input2])
 		else:
-			make_prediction(ichr,ipos,wt,nw,modfile,ucsc_dir)
+			make_prediction(ichr,ipos,wt,nw,modfile,ucsc_dir,win,fasta,dbpp1,dbpp2)
 				
