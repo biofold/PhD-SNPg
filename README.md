@@ -4,7 +4,7 @@
 INTRODUCTION
       
       Emidio Capriotti, 2016.
-      Scripts are licensed under a Creative Commons by NC-SA.
+      Scripts are licensed under the Creative Commons by NC-SA license.
 
       PhD-SNPg is a program for the annotation of single nucleotide variants that uses data from the UCSC repository.
 
@@ -77,9 +77,9 @@ OUTPUT
 
       PhD-SNP resturns in output a probabilistic score between 0 and 1. If the score is >0.5 the variants is predicted as disease related. The probability is added as an extra column to the input file. An example of output is reported below.
 
-     1       10042376        C       G       0.1652
-     1       197094291       C       T       0.9427
-     2       31751295        G       A       0.7552
-     2       71797809        C       T       0.8383
-     2       179577870       T       C       0.0162
-     5       74046464        C       T       0.0440
+        1       10042376        C       G       0.1652
+        1       197094291       C       T       0.9427
+        2       31751295        G       A       0.7552
+        2       71797809        C       T       0.8383
+        2       179577870       T       C       0.0162
+        5       74046464        C       T       0.0440
