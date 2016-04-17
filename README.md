@@ -8,7 +8,7 @@ that uses data from the UCSC repository.
 
 INSTALLATION
 
-   Minimum requirements:
+      Minimum requirements:
       wget, zcat, scikit-learn
 
       Run:
@@ -28,23 +28,23 @@ INSTALLATION
 
 MANUAL INSTALLATION
 
-   1) Download phd-snp-g script from github
-      - git clone https://github.com/ecapriotti/phd-snp-g
+      1) Download phd-snp-g script from github
+        - git clone https://github.com/ecapriotti/phd-snp-g
 
-   2) Required python library: scikit-learn
-      - git://github.com/scikit-learn/scikit-learn
+      2) Required python library: scikit-learn
+        - git://github.com/scikit-learn/scikit-learn
 
-   3) Required UCSC tools and data:
-      - bigWigToBedGraph and twoBitToFa from
-        http://hgdownload.cse.ucsc.edu/admin/exe
-        in ucsc/exe directory
+      3) Required UCSC tools and data:
+        - bigWigToBedGraph and twoBitToFa from
+          http://hgdownload.cse.ucsc.edu/admin/exe
+          in ucsc/exe directory
 
-      - For hg19 based predictions:
-        hg19.2bit: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit
-        hg19.phyloP46way.primate.bw http://snps.biofold.org/phd-snp-g/ucsc/hg19/hg19.phyloP46way.primate.bw	
-        hg19.100way.phyloP100way.bw: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/phyloP100way/hg19.100way.phyloP100way.bw
-        in ucsc/hg19 directory
-        Alterantively hg19 bundle is available at http://snps.biofold.org/phd-snp-g/ucsc/hg19.tar.gz		
+        - For hg19 based predictions:
+          hg19.2bit: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit
+          hg19.phyloP46way.primate.bw http://snps.biofold.org/phd-snp-g/ucsc/hg19/hg19.phyloP46way.primate.bw	
+          hg19.100way.phyloP100way.bw: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/phyloP100way/hg19.100way.phyloP100way.bw
+          in ucsc/hg19 directory
+          Alterantively hg19 bundle is available at http://snps.biofold.org/phd-snp-g/ucsc/hg19.tar.gz		
 
       - For hg38 based predictions:
         hg38.2bit: http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit
