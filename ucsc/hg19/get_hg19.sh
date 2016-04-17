@@ -1,4 +1,10 @@
 #!/bin/bash
+# Expected files in this directory 
+# - hg19.2bit
+# - hg19.phyloP46way.primate.bw
+# - hg19.100way.phyloP100way.bw
+# from http://hgdownload.cse.ucsc.edu/goldenPath/hg19/
+
 path=`dirname $0`
 
 echo '- Download hg19.2bit'
