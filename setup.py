@@ -127,7 +127,7 @@ def test():
 		print out[1]
 		if out[0]!=0:		
 			print >> sys.stderr,'WARNING: Not found file',i
-			hgs.remove('hg19')
+			if 'hg19' in hgs: hgs.remove('hg19')
 	print '\n4) Check hg38 files'
 	files=['hg38.2bit','hg38.phyloP100way.bw','hg38.phyloP7way.bw']
 	for i in files:
@@ -137,7 +137,7 @@ def test():
 		print out[1]
 		if out[0]!=0:
 			print >> sys.stderr,'WARNING: Not found file',i
-			hgs.remove('hg38')
+			if 'hg38' in hgs: hgs.remove('hg38')
 	if hgs==[]:
 		print >> sys.stderr,'ERROR: UCSC data file not correctly downloaded'
 		sys.exit()
