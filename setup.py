@@ -87,7 +87,7 @@ def setup(arch_type,hg='all'):
 	print '4) Download UCSC Data. Can take few minutes'
 	if hg=='all' or hg=='hg19':
 		out=get_ucsc_data('hg19','hg19.2bit','bigZips')
-		biofold='http://snps.biofold.org/phd-snp-g/ucsc'
+		biofold='http://snps.biofold.org/PhD-SNPg/ucsc'
 		out=get_ucsc_data('hg19','hg19.phyloP46way.primate.bw','',biofold)
 		get_ucsc_data('hg19','hg19.100way.phyloP100way.bw','phyloP100way')
 	if hg=='all' or hg=='hg38':
