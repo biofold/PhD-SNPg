@@ -164,6 +164,7 @@ def test():
 		sys.exit(1)
 	print '\n7) Test predict_variants.py'
 	cmd='python predict_variants.py test/test_variants_'+hgs[0]+'.tsv -g '+hgs[0]
+	print cmd
 	out=getstatusoutput(cmd+' |head -n 5')
 	print out[1]
 	if out[0]!=0:
