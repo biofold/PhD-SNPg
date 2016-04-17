@@ -83,7 +83,7 @@ def setup(arch_type,hg='all'):
 	if out[0]!=0 and out[0]!=65280:
 		print >> sys.stderr,'ERROR: Incorrect architecture check your system or compile it.'
 		print sys.exit(1)
-	print '\n4) Download UCSC Data. Can take few minutes'
+	print '\n4) Download UCSC Data. Can take few minutes.'
 	if hg=='all' or hg=='hg19':
 		out=get_ucsc_data('hg19','hg19.2bit','bigZips')
 		biofold='http://snps.biofold.org/PhD-SNPg/ucsc'
