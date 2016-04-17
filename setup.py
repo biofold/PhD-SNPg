@@ -61,7 +61,6 @@ def get_ucsc_data(hg,namefile,odir,ucsc_dat='http://hgdownload.cse.ucsc.edu/gold
 
 def setup(arch_type,hg='all'):
 	prog_dir = os.path.dirname(os.path.abspath(__file__))
-	tool_dir
 	prog_get = 'wget'
 	print '1) Check wget'
 	cmd='which '+prog_get
