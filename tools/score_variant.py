@@ -29,6 +29,8 @@ def check_seq(seq,slen,right=True):
 
 
 def get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win=3,dbname='hg38.2bit',prog='twoBitToFa'):
+	nuc=''
+	seq=''
 	s=max(0,ipos-win)
 	e=ipos+win+1
 	cmd1=ucsc_exe+'/'+prog+' '+ucsc_dbs+'/'+dbname+' stdout -seq='+ichr+' -start='+str(s)+' -end='+str(ipos+1)+' | grep -v "^>" '
@@ -39,13 +41,15 @@ def get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win=3,dbname='hg38.2bit',prog='twoB
 	out2=getstatusoutput(cmd2)
 	if out1[0]!=0:  
 		print >> sys.stderr,'ERROR: Sequence fetch -', out1[1]
-		return ''
+		return seq,nuc
 	if out2[0]!=0:	
 		print >> sys.stderr,'ERROR: Sequence fetch -', out2[1]
-		return ''
+		return seq,nuc
 	seq1=check_seq(out1[1],win+1,True)
 	seq2=check_seq(out2[1],win+1,False)
-	return seq1[-1],seq1[:-1]+seq2	
+	nuc=seq1[-1]
+	seq=seq1[:-1]+seq2
+	return nuc,seq
 
 
 def get_seqinput(seq,mut):
@@ -99,8 +103,14 @@ def get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win=3,dbname='hg38.phyloP100way
 
 def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg38.2bit',dbpp1='hg38.phyloP7way.bw',dbpp2='hg38.phyloP100way.bw',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	# for 0 starting genome
+	nuc=''
+	seq=''
+	seq_input=[]
+	cons_input1=[]
+	cons_input2=[]
 	ipos=ipos-1
 	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbfasta,fprog)
+	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input1,cons_input2
         seq_input=get_seqinput(seq,wt+str(win+1)+nw)
         cons_input1=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpp1,cprog)
         cons_input2=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpp2,cprog)
