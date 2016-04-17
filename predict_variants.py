@@ -123,7 +123,7 @@ def get_options():
 	parser.add_option('--pass', action='store_true', dest='fpass', default=False, help='Predict only PASS variants. Check column 7 in vcf file')
 	(options, args) = parser.parse_args()
 	outfile = ''
-	modfile = prog_dir + '/data/model_w3_p7_100.pkl'
+	modfile = prog_dir + '/data/model/model_w3_p7_100.pkl'
 	hg='hg38'
 	coord=False
 	vcf=False
