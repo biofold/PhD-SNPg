@@ -11,18 +11,18 @@ INSTALLATION
    Minimum requirements:
       wget, zcat, scikit-learn
 
-   Run:
-      python setup.py install arch_type
+      Run:
+        python setup.py install arch_type
 
       For Linux 64bit architecture there are two compiled versions:
         - linux.x86_64
         - linux.x86_64.v287
 
       Installation time depends on the network speed.
-      About 30G files from UCSC need to be downloaded.
+      About 30G UCSC files need to be downloaded.
 
-   Test:
-     python setup.py test	
+      Test:
+        python setup.py test	
 
 
 
