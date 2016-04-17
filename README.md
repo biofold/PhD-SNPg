@@ -1,12 +1,31 @@
 # PhD-SNPg
-# Emidio Capriotti, 2016
-# Scripts are licensed under a Creative Commons by NC-SA
+Emidio Capriotti, 2016
+Scripts are licensed under a Creative Commons by NC-SA
 
 PhD-SNPg is a program for the annotation of single nucleotide variants
 that uses data from the UCSC repository.
 
 
 INSTALLATION
+   Minimum requirements:
+      wget, zcat, scikit-learn
+      
+   Run:
+      python setup.py install arch_type
+      
+      Linux 64bit architecture has two compiled version:
+	- linux.x86_64
+	- linux.x86_64.v287
+
+      Installation time depends on the network speed.
+      About 30G files from UCSC need to be downloaded.
+
+    Test:
+     python setup.py test	
+
+
+
+MANUAL INSTALLATION
 
    1) Download phd-snp-g script from github
       - git clone https://github.com/ecapriotti/phd-snp-g

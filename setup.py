@@ -178,7 +178,8 @@ if __name__ == '__main__':
 	if len(sys.argv)==1:
 		print 'python setup.py cmd arch_type [hg] '
 		print '- cmd: install or test'
-		print '- arch_type: linux.x86_64.v287, linux.x86_64.v287, macOSX.x86_64, etc'
+		print '- arch_type: linux.x86_64, linux.x86_64.v287, macOSX.x86_64, etc'
+		print '- hg: all, hg19, hg38'
 		sys.exit(0)
 	opt=sys.argv[1]
 	if opt=='install':
@@ -193,7 +194,8 @@ if __name__ == '__main__':
 	else:
 		print 'python setup.py cmd arch_type [hg] '
 		print '- cmd: install or test'
-		print '- arch_type: linux.x86_64.v287, linux.x86_64.v287, macOSX.x86_64, etc'
+		print '- arch_type: linux.x86_64, linux.x86_64.v287, macOSX.x86_64, etc'
+		print '- hg: all, hg19, hg38' 
 
 
 
