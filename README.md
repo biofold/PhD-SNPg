@@ -6,8 +6,7 @@ INTRODUCTION
       Emidio Capriotti, 2016
       Scripts are licensed under a Creative Commons by NC-SA
 
-      PhD-SNPg is a program for the annotation of single nucleotide variants
-      that uses data from the UCSC repository.
+      PhD-SNPg is a program for the annotation of single nucleotide variants that uses data from the UCSC repository.
 
 
 INSTALLATION
@@ -60,8 +59,7 @@ MANUAL INSTALLATION
 
 HOW TO RUN
 		
-      PhD-SNPg can take in input a single variation or a file containing multiple 
-      single nucleotide variants.
+      PhD-SNPg can take in input a single variation or a file containing multiple single nucleotide variants.
 
       - For single variants use the option -c:
         python predict_variants.py chr7,158715219,A,G -g hg19 -c
