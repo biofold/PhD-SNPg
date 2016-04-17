@@ -13,8 +13,6 @@ INSTALLATION
    Run:
       python setup.py install arch_type
 
-   Run:
-      python setup.py install arch_type
       Linux 64bit architecture has two compiled version:
         - linux.x86_64
         - linux.x86_64.v287
@@ -22,7 +20,7 @@ INSTALLATION
       Installation time depends on the network speed.
       About 30G files from UCSC need to be downloaded.
 
-    Test:
+   Test:
      python setup.py test	
 
 
