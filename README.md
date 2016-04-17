@@ -10,11 +10,11 @@ INSTALLATION
 
    Minimum requirements:
       wget, zcat, scikit-learn
-      
+
    Run:
       python setup.py install arch_type
 
-      Linux 64bit architecture has two compiled version:
+     For  Linux 64bit architecture there are two compiled versions:
         - linux.x86_64
         - linux.x86_64.v287
 
