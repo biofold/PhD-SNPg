@@ -13,6 +13,8 @@ INSTALLATION
    Run:
       python setup.py install arch_type
 
+   Run:
+      python setup.py install arch_type
       Linux 64bit architecture has two compiled version:
         - linux.x86_64
         - linux.x86_64.v287
