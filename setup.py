@@ -47,7 +47,7 @@ def get_ucsc_data(hg,namefile,odir,ucsc_dat='http://hgdownload.cse.ucsc.edu/gold
 	prog_dir = os.path.dirname(os.path.abspath(__file__))
         ucsc_dir = prog_dir+'/ucsc/'+hg
 	prog_get = 'wget'
-	print '   Download',namefile
+	print '\n   Download',namefile
 	data = ucsc_dat+'/'+hg+'/'+odir+'/'+namefile
 	cmd = prog_get+' '+data+' -O '+ucsc_dir+'/'+namefile
 	print cmd
@@ -78,12 +78,12 @@ def setup(arch_type,hg='all'):
 	if out[0]!=0:
 		print >> sys.stderr, "ERROR: Command wget not available."
 		sys.exit(1)
-	print '3) Download UCSC Tools'
+	print '\n3) Download UCSC Tools'
 	out=get_ucsc_tools(arch_type)
 	if out[0]!=0 and out[0]!=65280:
 		print >> sys.stderr,'ERROR: Incorrect architecture check your system or compile it.'
 		print sys.exit(1)
-	print '4) Download UCSC Data. Can take few minutes'
+	print '\n4) Download UCSC Data. Can take few minutes'
 	if hg=='all' or hg=='hg19':
 		out=get_ucsc_data('hg19','hg19.2bit','bigZips')
 		biofold='http://snps.biofold.org/PhD-SNPg/ucsc'
