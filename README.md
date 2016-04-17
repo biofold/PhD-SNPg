@@ -1,9 +1,11 @@
 # PhD-SNPg
-Emidio Capriotti, 2016
-Scripts are licensed under a Creative Commons by NC-SA
 
-PhD-SNPg is a program for the annotation of single nucleotide variants
-that uses data from the UCSC repository.
+INTRODUCTION
+      Emidio Capriotti, 2016
+      Scripts are licensed under a Creative Commons by NC-SA
+
+      PhD-SNPg is a program for the annotation of single nucleotide variants
+      that uses data from the UCSC repository.
 
 
 INSTALLATION
@@ -46,15 +48,15 @@ MANUAL INSTALLATION
           in ucsc/hg19 directory
           Alterantively hg19 bundle is available at http://snps.biofold.org/phd-snp-g/ucsc/hg19.tar.gz		
 
-      - For hg38 based predictions:
-        hg38.2bit: http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit
-        hg38.phastCons7way.bw http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phastCons7way/hg38.phastCons7way.bw
-        hg38.phastCons100way.bw http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phastCons100way/hg38.phastCons100way.bw
-        in ucsc/hg38 directory
-        Alterantively hg38 bundle is available at http://snps.biofold.org/phd-snp-g/ucsc/hg38.tar.gz
+        - For hg38 based predictions:
+          hg38.2bit: http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit
+          hg38.phastCons7way.bw http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phastCons7way/hg38.phastCons7way.bw
+          hg38.phastCons100way.bw http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phastCons100way/hg38.phastCons100way.bw
+          in ucsc/hg38 directory
+          Alterantively hg38 bundle is available at http://snps.biofold.org/phd-snp-g/ucsc/hg38.tar.gz
 
 
-HOW TO RUN:
+HOW TO RUN
 		
       PhD-SNPg can take in input a single variation or a file containing multiple 
       single nucleotide variants.
