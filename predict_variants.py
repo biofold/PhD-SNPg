@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-import os, sys, subprocess, __builtin__
+import os, sys, subprocess
+import  __builtin__
 from commands import getstatusoutput
 from sklearn.externals import joblib
+
 
 def global_vars():
 	global tool_dir, prog_dir, ucsc_dir, ucsc_exe, verbose, hg19, hg38, prog_cat
@@ -42,7 +44,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg3
 
 
 
-def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfasta='hg38.2bit',dbpp1='hg38.phyloP7way.bw',dbpp2='hg38.phyloP100way.bw',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg38.2bit',dbpp1='hg38.phyloP7way.bw',dbpp2='hg38.phyloP100way.bw',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	model=joblib.load(modfile)
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()        
@@ -53,15 +55,11 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfast
 			if vcf and line.find('#CHROM')==0: line=line+'\tPREDICTION' 
 			print line
 			continue 	
-		v=line.rstrip().split(s)
+		v=line.rstrip().split()
 		if len(v)<4:
 			print >> sys.stderr,'WARNING: Incorrect line ',c	
 			print line
                         continue
-		if len(wt)>1 or len(nw)>1 or 'ACGT'.find(wt)==-1 or 'ACGT'.find(nw)==-1 or wt==nw:
-			print line+'\tNA'
-			#print '\t'.join(str(i) for i in [ichr,pos,wt,nw,'NA'])
-			continue
 		if vcf:
 			if fpass and len(v)>6 and v[6]!='PASS':
 				print line+'\tNA'
@@ -69,6 +67,10 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfast
 			(ichr,pos,rs,wt,nw)=tuple(v[:5])
 		else:
 			(ichr,pos,wt,nw)=tuple(v[:4])
+		if len(wt)>1 or len(nw)>1 or 'ACGT'.find(wt)==-1 or 'ACGT'.find(nw)==-1 or wt==nw:
+			print line+'\tNA'
+			#print '\t'.join(str(i) for i in [ichr,pos,wt,nw,'NA'])
+			continue
 		nchr=ichr
 		if nchr.find('chr')==-1: nchr='chr'+ichr
 		ipos=int(pos)
@@ -169,6 +171,6 @@ if __name__ == '__main__':
 			if not os.path.isfile(namefile):
 				print >> sys.stderr(),'ERROR: Input file not found',namefile
 				sys.exit(1)
-			make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win,'\t',fasta,dbpp1,dbpp2)
+			make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpp1,dbpp2)
 	else:
 		print 'predict_variants.py variant_file'

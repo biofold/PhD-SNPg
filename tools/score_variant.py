@@ -3,6 +3,7 @@ import os,sys
 from commands import getstatusoutput
 from sklearn.externals import joblib
 
+
 def global_vars():
 	global tool_dir, prog_dir, ucsc_dir, ucsc_exe, verbose, hg19, hg38
 	verbose = False
