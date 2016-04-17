@@ -75,7 +75,7 @@ HOW TO RUN
 
 OUTPUT
 
-      PhD-SNP resturns in output a probabilistic score between 0 and 1. If the score is >0.5 the variants is predicted as disease related. The probability is added as an extra column to the input file. An example of output is reported below.
+      PhD-SNP returns in output a probabilistic score between 0 and 1. If the score is >0.5 the variants is predicted as disease related. The probability is added as an extra column to the input file. An example of output is reported below.
 
         1       10042376        C       G       0.1652
         1       197094291       C       T       0.9427
