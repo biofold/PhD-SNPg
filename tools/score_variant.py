@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-import os,sys
+import os,sys,pickle
 from commands import getstatusoutput
 from sklearn.externals import joblib
 
 
 def global_vars():
-	global tool_dir, prog_dir, ucsc_dir, ucsc_exe, verbose, hg19, hg38
+	global tool_dir, prog_dir, ucsc_dir, ucsc_exe, prog_dat, verbose, hg19, hg38
 	verbose = False
 	tool_dir = os.path.dirname(os.path.abspath(__file__))
 	prog_dir = '/'.join(tool_dir.split('/')[:-1])
+	prog_dat = prog_dir + '/data/model'
 	ucsc_dir = prog_dir+'/ucsc'
 	ucsc_exe = ucsc_dir+'/exe'
 	hg19={}
@@ -130,8 +131,13 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg3
 		sys.exit(1)
 	model=joblib.load(modfile)
 	X=[seq_input + cons_input1+ cons_input2 ]
-	y_pred=prediction(X,model)
-	print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])
+	y_pred,y_fdrs=prediction(X,model)
+	if y_pred=='NA':
+		print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
+		print '\t'.join([str(i) for i in [ichr,ipos,wt+','+nw] ])+'\tNA\tNA\tNA'
+	else:
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1]])
+	return
 
 
 def get_file_input(namefile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfasta='hg38.2bit',dbpp1='hg38.phyloP7way.bw',dbpp2='hg38.phyloP100way.bw',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
@@ -172,14 +178,27 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfast
 		if seq_input==[]: print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
 		if cons_input1==[] or cons_input2==[]: print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
 		X=[seq_input + cons_input1+ cons_input2 ]
-		y_pred=prediction(X,model)
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
+		y_pred,y_fdrs=prediction(X,model)
+		if y_pred=='NA':
+			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
+			print line+'\tNA'
+			continue
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1]])	
 	return 
 
 
-def prediction(X,model):
-        y_pred = model.predict_proba(X)[:, 1]
-        return y_pred		
+def prediction(X,model,fdr_file='fdr_mean.pkl'):
+	y_fdrs=[]
+	try:
+        	y_pred = model.predict_proba(X)[:, 1]
+		if os.path.isfile(prog_dat+'/'+fdr_file):
+			fdr_dic=pickle.load(open(prog_dat+'/'+fdr_file))
+			y_fdrs=[fdr_dic[round(i,3)] for i in y_pred]
+		else:
+			y_fdrs=['NA' for i in y_pred]
+	except:
+		y_pred = 'NA'
+	return y_pred,y_fdrs
 
 
 def get_options():
@@ -238,5 +257,5 @@ if __name__ == '__main__':
 			else:
 				print >> sys.stderr, 'ERROR: Variants',ichr,ipos,wt+','+nw
 		else:
-			make_prediction(ochr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win,'\t',fasta,dbpp1,dbpp2)
+			make_prediction(ochr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpp1,dbpp2)
 				
