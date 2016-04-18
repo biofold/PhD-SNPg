@@ -78,11 +78,11 @@ OUTPUT
       PhD-SNPg returns in output: 
 
         PREDICTION: Pathogenic or Benign
-	SCORE: a probabilistic score between 0 and 1. If the score is >0.5 the variants is predicted as disease related.
+        SCORE: a probabilistic score between 0 and 1. If the score is >0.5 the variants is predicted as disease related.
         FDR: The false discovery rate associated to higher SCORE.
      	1-NPV: Probability of disease-related variants below SCORE.
-	PhyloP100: PhyloP100 in the mutated position.
-	AvgPhyloP100: Average value of PhyloP100 in 7 nucleotide window around the mutated position.
+        PhyloP100: PhyloP100 in the mutated position.
+        AvgPhyloP100: Average value of PhyloP100 in 7 nucleotide window around the mutated position.
 
         The scores added as extra columns to the input file. An example of output is reported below.
 
