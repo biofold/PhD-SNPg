@@ -229,11 +229,14 @@ if __name__ == '__main__':
 			sys.exit()
 		if modfile=='':
 			(nuc,seq,seq_input,cons_input1,cons_input2)=get_phdsnp_input(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win,fasta,dbpp1,dbpp2)
-			chr_data='\t'.join([ichr,str(ipos),wt+','+nw,seq])
-			seq_data='\t'.join([str(i) for i in seq_input])
-			cons1_data='\t'.join([str(i) for i in cons_input1])
-			cons2_data='\t'.join([str(i) for i in cons_input2])
-			print '%s\t%s\t%s\t%s' %(chr_data,seq_data,cons1_data,cons2_data)
+			if seq_input!=[] and cons_input1!=[] and cons_input2!=[]: 
+				chr_data='\t'.join([ichr,str(ipos),wt+','+nw,seq])
+				seq_data='\t'.join([str(i) for i in seq_input])
+				cons_data1='\t'.join([str(i) for i in cons_input1])
+				cons_data2='\t'.join([str(i) for i in cons_input2])
+				print '%s\t%s\t%s\t%s' %(chr_data,seq_data,cons_data1,cons_data2)
+			else:
+				print >> sys.stderr, 'ERROR: Variants',ichr,ipos,wt+','+nw
 		else:
 			make_prediction(ochr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win,'\t',fasta,dbpp1,dbpp2)
 				
