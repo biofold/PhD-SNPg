@@ -218,6 +218,9 @@ if __name__ == '__main__':
 	ucsc_dbs=ucsc_dir+'/'+hg
 	if len(args)>1:
 		ichr=sys.argv[1]
+		ochr=ichr
+		if ichr.find('chr')==-1: ochr='chr'+ichr
+		if ochr=='chrMT': ochr='chrM'
 		ipos=int(sys.argv[2])
 		wt=sys.argv[3]
 		nw=sys.argv[4]
@@ -225,8 +228,12 @@ if __name__ == '__main__':
 			print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nuleotide',wt,nw
 			sys.exit()
 		if modfile=='':
-			(nuc,seq,seq_input,cons_input1,cons_input2)=get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win,fasta,dbpp1,dbpp2)
-			print nuc, seq, '\t'.join([str(i) for i in seq_input]), '\t'.join([str(i) for i in cons_input1]), '\t'.join([str(i) for i in cons_input2])
+			(nuc,seq,seq_input,cons_input1,cons_input2)=get_phdsnp_input(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win,fasta,dbpp1,dbpp2)
+			chr_data='\t'.join([ichr,str(ipos),wt+','+nw,seq])
+			seq_data='\t'.join([str(i) for i in seq_input])
+			cons1_data='\t'.join([str(i) for i in cons_input1])
+			cons2_data='\t'.join([str(i) for i in cons_input2])
+			print '%s\t%s\t%s\t%s' %(chr_data,seq_data,cons1_data,cons2_data)
 		else:
-			make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win,'\t',fasta,dbpp1,dbpp2)
+			make_prediction(ochr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win,'\t',fasta,dbpp1,dbpp2)
 				

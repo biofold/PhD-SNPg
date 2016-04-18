@@ -161,11 +161,14 @@ if __name__ == '__main__':
 	if len(args)>0:
 		if coord: 
 			(ichr,ipos,wt,nw)=sys.argv[1].split(',')[:4]
+			ochr=ichr
+			if ichr.find('chr')==-1: ochr='chr'+ichr
+			if ochr=='chrMT': ochr='chrM'
 			ipos=int(ipos)
 			if len(wt)>1 or len(nw)>1 or 'ACGT'.find(wt)==-1 or 'ACGT'.find(nw)==-1 or wt==nw:
 				print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nuleotide',wt,nw
 				sys.exit(1)
-			make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpp1,dbpp2)
+			make_prediction(ochr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpp1,dbpp2)
 		else:	
 			namefile=args[0]
 			if not os.path.isfile(namefile):
