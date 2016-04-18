@@ -131,12 +131,15 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg3
 		sys.exit(1)
 	model=joblib.load(modfile)
 	X=[seq_input + cons_input1+ cons_input2 ]
-	y_pred,y_fdrs=prediction(X,model)
-	if y_pred=='NA':
+	y_pred,y_fdrs,c_pred=prediction(X,model)
+	if y_pred==[]:
 		print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
-		print '\t'.join([str(i) for i in [ichr,ipos,wt+','+nw] ])+'\tNA\tNA\tNA'
+		print '\t'.join([str(i) for i in [ichr,ipos,wt+','+nw] ])+'\tNA\tNA\tNA\tNA\tNA\tNA'
 	else:
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1]])
+		print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\t1-NPV\tPhyloP100\tAvgPhyloP100"
+		pp100=cons_input2[win]
+		avgpp100=sum(cons_input2)/float(len(cons_input2))
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1],pp100,avgpp100])
 	return
 
 
@@ -165,12 +168,13 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfast
 	model=joblib.load(modfile)
 	f=open(namefile)
 	c=1
+	print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\t1-NPV\tPhyloP100\tAvgPhyloP100"
 	for line in f:	
 		v=line.rstrip().split(s)
 		if len(v)<4: print >> sys.stderr,'WARNING: Incorrect line ',c,line.rstrip()
 		(ichr,pos,wt,nw)=v[:4]
 		if len(wt)>1 and len(nw)>1:
-			print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'NA'])
+			print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'NA','NA','NA','NA','NA','NA'])
 			continue
 		ipos=int(pos)
 		(nuc,seq,seq_input,cons_input1,cons_input2)=get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpp1,dbpp2,fprog,cprog)
@@ -178,27 +182,32 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,s='\t',dbfast
 		if seq_input==[]: print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
 		if cons_input1==[] or cons_input2==[]: print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
 		X=[seq_input + cons_input1+ cons_input2 ]
-		y_pred,y_fdrs=prediction(X,model)
-		if y_pred=='NA':
+		y_pred,y_fdrs,c_pred=prediction(X,model)
+		if y_pred==[]:
 			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
-			print line+'\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1]])	
+		pp100=cons_input2[win]
+		avgpp100=sum(cons_input2)/float(len(cons_input2))
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1],pp100,avgpp100])	
 	return 
 
 
 def prediction(X,model,fdr_file='fdr_mean.pkl'):
+	y_pred=[]
 	y_fdrs=[]
+	c_pred=[]
 	try:
         	y_pred = model.predict_proba(X)[:, 1]
+		c_pred = ['Pathogenic' if i>0.5 else 'Benign' for i in y_pred ]
 		if os.path.isfile(prog_dat+'/'+fdr_file):
 			fdr_dic=pickle.load(open(prog_dat+'/'+fdr_file))
 			y_fdrs=[fdr_dic[round(i,3)] for i in y_pred]
 		else:
 			y_fdrs=['NA' for i in y_pred]
 	except:
-		y_pred = 'NA'
-	return y_pred,y_fdrs
+		print >> sys.stderr,'WARNING: Prediction errorr check input and scoring models.'
+	return y_pred,y_fdrs,c_pred
 
 
 def get_options():

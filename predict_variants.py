@@ -40,12 +40,15 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg3
 	if cons_input1==[]: cons_input1=[0.0 for i in range(2*win+1)]
 	model=joblib.load(modfile)
 	X=[seq_input + cons_input1+ cons_input2 ]
-	y_pred,y_fdrs=prediction(X,model)
-	if y_pred=='NA':
+	y_pred,y_fdrs,c_pred=prediction(X,model)
+	if y_pred==[]:
 		print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
-		print '\t'.join([str(i) for i in [ichr,ipos,wt+','+nw] ])+'\tNA\tNA\tNA'
+		print '\t'.join([str(i) for i in [ichr,ipos,wt+','+nw] ])+'\tNA\tNA\tNA\tNA\tNA\tNA'
 	else:
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1]])
+		print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\t1-NPV\tPhyloP100\tAvgPhyloP100"
+		pp100=cons_input2[win]
+		avgpp100=sum(cons_input2)/float(len(cons_input2))
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1],pp100,avgpp100])
 
 
 
@@ -54,10 +57,11 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg38
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()        
 	c=1
+	if not vcf: print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\t1-NPV\tPhyloP100\tAvgPhyloP100"
 	for line in stdout.split('\n'):
 		if line == '': continue 
 		if line[0]=='#':
-			if vcf and line.find('#CHROM')==0: line=line+'\tPREDICTION\tFDR\t1-NPV'
+			if vcf and line.find('#CHROM')==0: line=line+'\tPREDICTION\tSCORE\tFDR\t1-NPV\tPhyloP100\tAvgPhyloP100'
 			print line
 			continue 	
 		v=line.rstrip().split()
@@ -67,7 +71,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg38
                         continue
 		if vcf:
 			if fpass and len(v)>6 and v[6]!='PASS':
-				print line+'\tNA'
+				print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 				continue
 			(ichr,pos,rs,wt,nw)=tuple(v[:5])
 		else:
@@ -82,43 +86,49 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg38
 		(nuc,seq,seq_input,cons_input1,cons_input2)=get_phdsnp_input(nchr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpp1,dbpp2,fprog,cprog)
 		if seq=='': 
 			print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos
-			print line+'\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if seq_input==[]: 
 			print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
-			print line+'\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		#if cons_input1==[] or cons_input2==[]:
 		#Check only P100
 		if cons_input2==[]:
 			print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
-			print line+'\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if cons_input1==[]: cons_input1=[0.0 for i in range(2*win+1)]
 		X=[ seq_input + cons_input1+ cons_input2 ]
-		y_pred,y_fdrs=prediction(X,model)
-		if y_pred=='NA':
+		y_pred,y_fdrs,c_pred=prediction(X,model)
+		if y_pred==[]:
 			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
-			print line+'\tNA\tNA\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
-		print line+'\t'+'%.3f\t%.3f\t%.3f' %(y_pred[0],y_fdrs[0][0],y_fdrs[0][1])
+		pp100=cons_input2[win]
+		avgpp100=sum(cons_input2)/float(len(cons_input2))	
+		#print pp100,avgpp100,cons_input2
+		print line+'\t'+'%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f' %(c_pred[0],y_pred[0],y_fdrs[0][0],y_fdrs[0][1],pp100,avgpp100)
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
 		c=c+1
 	return 
 
 
 def prediction(X,model,fdr_file='fdr_mean.pkl'):
+	y_pred=[]
 	y_fdrs=[]
+	c_pred=[]
 	try:
 	        y_pred = model.predict_proba(X)[:, 1]
+		c_pred = ['Pathogenic' if i>0.5 else 'Benign' for i in y_pred ]
 		if os.path.isfile(prog_dat+'/'+fdr_file):
 			fdr_dic=pickle.load(open(prog_dat+'/'+fdr_file))
 			y_fdrs=[fdr_dic[round(i,3)] for i in y_pred]
 		else:
 			y_fdrs=['NA' for i in y_pred]
 	except:
-		y_pred = 'NA'
-        return y_pred,y_fdrs		
+		print >> sys.stderr,'WARNING: Prediction errorr check input and scoring models.'
+        return y_pred,y_fdrs,c_pred		
 
 
 def get_options():

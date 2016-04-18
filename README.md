@@ -75,15 +75,22 @@ HOW TO RUN
 
 OUTPUT
 
-      PhD-SNP returns in output: 
-        PREDICTION: a probabilistic score between 0 and 1.If the score is >0.5 the variants is predicted as disease related.
-	FDR: The false discovery rate associated to high PREDICTION score
-     	1-NPV: Probability of disease-related variants below the PREDICTION score   
-        The scores added as an extra column to the input file. An example of output is reported below.
+      PhD-SNPg returns in output: 
 
-        1       10042376        C       G       0.160   0.271   0.071
-        1       197094291       C       T       0.990   0.019   0.486
-        2       31751295        G       A       0.901   0.055   0.322
-        2       71797809        C       T       0.918   0.050   0.342
-        2       179577870       T       C       0.028   0.431   0.023
-        5       74046464        C       T       0.040   0.408   0.029
+        PREDICTION: Pathogenic or Benign
+	SCORE: a probabilistic score between 0 and 1. If the score is >0.5 the variants is predicted as disease related.
+        FDR: The false discovery rate associated to higher SCORE.
+     	1-NPV: Probability of disease-related variants below SCORE.
+	PhyloP100: PhyloP100 in the mutated position.
+	AvgPhyloP100: Average value of PhyloP100 in 7 nucleotide window around the mutated position.
+
+        The scores added as extra columns to the input file. An example of output is reported below.
+
+        #CHROM  POS     REF     ALT     PREDICTION      SCORE   FDR     1-NPV   PhyloP100       AvgPhyloP100
+        1       10042376        C       G       Benign  0.160   0.271   0.071   -0.159  4.509
+        1       197094291       C       T       Pathogenic      0.990   0.019   0.486   7.304   3.451
+        2       31751295        G       A       Pathogenic      0.901   0.055   0.322   1.810   3.205
+        2       71797809        C       T       Pathogenic      0.918   0.050   0.342   1.181   3.131
+        2       179577870       T       C       Benign  0.028   0.431   0.023   -6.363  2.406
+        5       74046464        C       T       Benign  0.040   0.408   0.029   -0.070  4.422
+
