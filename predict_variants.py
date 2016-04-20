@@ -77,7 +77,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=3,dbfasta='hg38
 		else:
 			(ichr,pos,wt,nw)=tuple(v[:4])
 		if len(wt)>1 or len(nw)>1 or 'ACGT'.find(wt)==-1 or 'ACGT'.find(nw)==-1 or wt==nw:
-			print line+'\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			#print '\t'.join(str(i) for i in [ichr,pos,wt,nw,'NA'])
 			continue
 		nchr=ichr
