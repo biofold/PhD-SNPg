@@ -442,7 +442,7 @@ if __name__ == '__main__':
 			if nw=='-':
 				lwt+=1
 				lnw=1
-			n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+			n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,fasta)
 			if n_wt=='' or n_nw=='':
 				print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 				sys.exit()
@@ -458,7 +458,7 @@ if __name__ == '__main__':
 					cons_data=cons_data+'\t'.join([str(i) for i in cons])+'\t'
 				cons_data=cons_data[:-1]
 				p_cod=0
-				if r_cod!=[]: pco_d=1
+				if r_cod!=[]: p_cod=1
 				m_len='%d\t%d\t%d' %(lwt,lnw,p_cod)
 				print '%s\t%s\t%s\t%s' %(chr_data,seq_data,cons_data,m_len)
 			else:
