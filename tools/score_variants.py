@@ -32,12 +32,15 @@ def parse_variants(ichr,pos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta='hg38.2bit',fprog='t
 	n_nw=''
 	if wt=='-': wt=''
 	if nw=='-': nw=''
-	cmd=ucsc_exe+'/'+fprog+' '+ucsc_dbs+'/'+dbfasta+' stdout -seq='+ichr+' -start='+str(ipos)+' -end='+str(ipos+wseq)+' | grep -v "^>" '
+	cmd=ucsc_exe+'/'+fprog+' '+ucsc_dbs+'/'+dbfasta+' stdout -seq='+ichr+' -start='+str(ipos)+' -end='+str(ipos+wseq)+' | grep -v "^>" | tr -d "\n" '
 	out=getstatusoutput(cmd)
         if out[0]!=0:
                 print >> sys.stderr,'ERROR: Sequence fetch -', out[1]
                 return n_wt,n_nw,n_pos
 	wt_seq=out[1].upper()
+	if wt_seq.find(wt)!=0:
+		print >> sys.stderr,'ERROR: Sequence fetch -', out[1]
+		return n_wt,n_nw,n_pos
 	nw_seq=nw+wt_seq[len(wt):]
 	lwt=len(wt_seq)
 	lnw=len(nw_seq)
@@ -67,8 +70,8 @@ def get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win=2,dbname='hg38.2bit',prog='twoB
 	seq=''
 	s=max(0,ipos-win)
 	e=ipos+win+1
-	cmd1=ucsc_exe+'/'+prog+' '+ucsc_dbs+'/'+dbname+' stdout -seq='+ichr+' -start='+str(s)+' -end='+str(ipos+1)+' | grep -v "^>" '
-	cmd2=ucsc_exe+'/'+prog+' '+ucsc_dbs+'/'+dbname+' stdout -seq='+ichr+' -start='+str(ipos)+' -end='+str(e)+' | grep -v "^>" '
+	cmd1=ucsc_exe+'/'+prog+' '+ucsc_dbs+'/'+dbname+' stdout -seq='+ichr+' -start='+str(s)+' -end='+str(ipos+1)+' | grep -v "^>" | tr -d "\n" '
+	cmd2=ucsc_exe+'/'+prog+' '+ucsc_dbs+'/'+dbname+' stdout -seq='+ichr+' -start='+str(ipos)+' -end='+str(e)+' | grep -v "^>" | tr -d "\n" '
 	if verbose: print >> sys.stderr, cmd1
 	if verbose: print >> sys.stderr, cmd2
 	out1=getstatusoutput(cmd1)

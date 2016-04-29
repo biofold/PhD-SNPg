@@ -173,6 +173,109 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 	return 
 
 
+def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+	model1=joblib.load(modfile[0])
+	model2=joblib.load(modfile[1])
+	list_pred=[]	
+	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	stdout, stderr = proc.communicate()        
+	c=1
+	for line in stdout.split('\n'):
+		list_pred=[]
+		if line == '': continue 
+		if line[0]=='#':
+			if line.find('#CHROM')==0: line=line+'\tPREDICTION\tSCORE\tFDR\t1-NPV\tPhyloP100\tAvgPhyloP100'
+			print line
+			continue 	
+		v=line.rstrip().split('\t')
+		if len(v)<5:
+			print >> sys.stderr,'WARNING: Incorrect line ',c	
+			print line
+			continue
+		if fpass and len(v)>6 and v[6]!='PASS':
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+			continue
+		(ichr,pos,rs,wt,nw)=tuple(v[:5])
+		list_nw=nw.split(',')
+		nchr=ichr
+		if nchr.find('chr')==-1: nchr='chr'+ichr
+		try:
+			ipos=int(pos)
+		except:
+			print >> sys.stderr,'ERROR: Incorrect input data. The VCF input file should have al least 5 columns (chr,position,id,ref,alt).'
+			sys.exit(1)
+		for inw in list_nw:
+			if wt==inw:
+				print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+				print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+				continue
+			lwt=len(wt)
+			lnw=len(inw)
+			if wt=='-':
+				lwt=1
+				lnw+=1
+			if inw=='-':
+				lwt+=1
+				lnw=1
+			n_wt,n_nw,n_pos=parse_variants(nchr,ipos,wt,inw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+			if n_wt=='' or n_nw=='':
+				print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,inw
+			if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
+				print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,inw		
+			if len(wt)==1 and len(inw)==1:
+				r_cod=[]
+				(nuc,seq,seq_input,cons_input)=get_snv_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,fprog,cprog)
+			else: 
+				(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
+			if seq=='': 
+				print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos
+				list_pred.append(6*['NA'])
+				continue
+			if seq_input==[]: 
+				print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+				list_pred.append(6*['NA'])
+				continue
+			if cons_input!=[]:
+				cons_input1=cons_input[0]
+				cons_input2=cons_input[1]
+			else:
+				print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
+				list_pred.append(6*['NA'])
+				continue
+			#if cons_input1==[] or cons_input2==[]:
+			#Check only P100
+			if cons_input2==[]:
+				print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
+				list_pred.append(6*['NA'])
+				continue
+			if cons_input1==[]: cons_input1=[0.0 for i in range(2*win+1)]
+			if len(wt)==1 and len(inw)==1:
+				X=[seq_input + cons_input1+ cons_input2 ]
+				y_pred,y_fdrs,c_pred=prediction(X,model1)
+			else:
+				p_cod=0
+				if r_cod!=[]: p_cod=1
+				X=[seq_input + cons_input1+ cons_input2 + [lwt, lnw, p_cod]]
+				y_pred,y_fdrs,c_pred=prediction(X,model2)		
+			if y_pred==[]:
+				print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
+				list_pred.append(6*['NA'])
+				continue
+			pp100=cons_input2[win]
+			avgpp100=sum(cons_input2)/float(len(cons_input2))
+			list_pred.append(['%s' %c_pred[0],'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1],'%.3f' %pp100,'%.3f' %avgpp100])
+		#print list_pred
+		if list_pred==[]:
+			out_data=6*('NA',)
+		else:
+			out_data=tuple([ ':'.join(single_pred[i]  for single_pred in list_pred)  for i in range(6)])	
+		#print pp100,avgpp100,cons_input2
+		print line+'\t'+'%s\t%s\t%s\t%s\t%s\t%s' %out_data		
+		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
+		c=c+1
+	return 
+
+
 def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	model1=joblib.load(modfile[0])
 	model2=joblib.load(modfile[1])	
@@ -189,7 +292,8 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 			continue
 		(ichr,pos,wt,nw)=tuple(v[:4])
 		if wt==nw or nw.find(',')>-1:
-			print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'NA','NA','NA','NA','NA','NA'])
+			print >> sys.stderr, 'WARNING: Incorrect input line.',ichr,pos,wt,nw
+			#print '\t'.join(str(i) for i in [ichr,pos,wt,nw,'NA','NA','NA','NA','NA','NA'])
 			continue
 		nchr=ichr
 		if nchr.find('chr')==-1: nchr='chr'+ichr
@@ -218,24 +322,24 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		if seq=='': 
 			print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos
-			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+			#print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if seq_input==[]: 
 			print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
-			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+			#print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if cons_input!=[]:
 			cons_input1=cons_input[0]
 			cons_input2=cons_input[1]
 		else:
 			print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
-			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+			#print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		#if cons_input1==[] or cons_input2==[]:
 		#Check only P100
 		if cons_input2==[]:
 			print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
-			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+			#print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if cons_input1==[]: cons_input1=[0.0 for i in range(2*win+1)]
 		if len(wt)==1 and len(nw)==1:
@@ -248,7 +352,7 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 			y_pred,y_fdrs,c_pred=prediction(X,model2)		
 		if y_pred==[]:
 			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
-			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+			#print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		pp100=cons_input2[win]
 		avgpp100=sum(cons_input2)/float(len(cons_input2))	
@@ -417,7 +521,7 @@ if __name__ == '__main__':
 				print >> sys.stderr,'ERROR: Input file not found',namefile
 				sys.exit(1)
 			if vcf:
-				make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpps,pklcod)
+				make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpps,pklcod)
 			else:
 				make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpps,pklcod)
 	else:
