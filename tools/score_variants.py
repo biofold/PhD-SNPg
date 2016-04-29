@@ -75,10 +75,12 @@ def get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win=2,dbname='hg38.2bit',prog='twoB
 	out2=getstatusoutput(cmd2)
 	if out1[0]!=0:  
 		print >> sys.stderr,'ERROR: Sequence fetch -', out1[1]
-		return seq,nuc
+		sys.exit(1)
+		#return seq,nuc
 	if out2[0]!=0:	
 		print >> sys.stderr,'ERROR: Sequence fetch -', out2[1]
-		return seq,nuc
+		sys.exit(1)
+		#return seq,nuc
 	seq1=check_seq(out1[1],win+1,True)
 	seq2=check_seq(out2[1],win+1,False)
 	nuc=seq1[-1]
@@ -176,7 +178,7 @@ def get_indel_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',
 	#Set genome starting position to 0        
 	ipos=ipos-1
 	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbfasta,fprog)
-	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input1,cons_input2,cons_input3	
+	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input,r_cod	
 	seq_input=get_seqinput(seq,wt,nw,win)
 	for dbpp in dbpps:
 		cons=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpp,cprog)
@@ -187,6 +189,9 @@ def get_indel_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',
 
 def get_coding_range(ichr,ipos,ucsc_exe,ucsc_dbs,pklcod):
 	r_cod=[]
+	if not os.path.isfile(ucsc_dbs+'/'+pklcod):
+		print >> sys.stderr,'ERROR: Coding region bed file not found.'
+		sys.exit(1)
 	cmd=ucsc_exe+'/bed_range.sh '+str(ichr)+' '+str(ipos+1)+' '+ucsc_dbs+'/'+pklcod
 	out=getstatusoutput(cmd)
 	if out[0]==0:
@@ -226,8 +231,12 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 	if cons_input.count([])>0: 
 		print >> sys.stderr, 'ERROR: Incorrect conservation data in position',ichr,ipos
 		sys.exit(1)
-	cons_input1=cons_input[0]
-	cons_input2=cons_input[1]
+	if cons_input!=[]:
+		cons_input1=cons_input[0]
+		cons_input2=cons_input[1]
+	else:
+		print >> sys.stderr, 'ERROR: Incorrect conservation data in position',ichr,ipos
+		sys.exit(1)
 	model=joblib.load(modfile)
 	if pklcod=='':
 		X=[seq_input + cons_input1+ cons_input2 ]
@@ -308,7 +317,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 		if n_wt=='' or n_nw=='':
 			print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 		if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
-			print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nuleotide',wt,nw		
+			print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw		
 		if wt==nw or nw.find(',')>-1:
 			print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'NA','NA','NA','NA','NA','NA'])
 			continue
@@ -317,10 +326,15 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 			(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,fprog,cprog)
 		else: 
 			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
-		cons_input1=cons_input[0]
-		cons_input2=cons_input[1]
 		if seq=='': print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos		
 		if seq_input==[]: print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+		if cons_input!=[]:
+			cons_input1=cons_input[0]
+			cons_input2=cons_input[1]
+		else:
+			print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+			continue
 		if cons_input1==[] or cons_input2==[]: print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
 		if len(wt)==1 and len(nw)==1:
 			X=[seq_input + cons_input1+ cons_input2 ]
@@ -430,7 +444,7 @@ if __name__ == '__main__':
 				print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 				sys.exit()
 			if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
-				print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nuleotide',wt,nw
+				print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw
 				sys.exit()	
 			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ochr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,fasta,dbpps,pklcod)
 			if seq_input!=[] and cons_input.count([])==0: 
