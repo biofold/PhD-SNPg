@@ -65,11 +65,14 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 	model=joblib.load(modfile)
 	if pklcod=='':
 		X=[seq_input + cons_input1+ cons_input2 ]
+		y_pred,y_fdrs,c_pred=prediction(X,model)
+		v_fdr=[y_fdrs[0][0],y_fdrs[0][1]]
 	else:
 		p_cod=0
 		if r_cod!=[]: p_cod=1
 		X=[seq_input + cons_input1+ cons_input2 + [lwt, lnw, p_cod]]
-	y_pred,y_fdrs,c_pred=prediction(X,model)
+		y_pred,y_fdrs,c_pred=prediction(X,model)
+		v_fdr=[y_fdrs[0][2],y_fdrs[0][3]]
 	if y_pred==[]:
 		print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
 		print '\t'.join([str(i) for i in [ichr,ipos,wt+','+nw] ])+'\tNA\tNA\tNA\tNA\tNA\tNA'
@@ -77,7 +80,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 		print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\t1-NPV\tPhyloP100\tAvgPhyloP100"
 		pp100=cons_input2[win]
 		avgpp100=sum(cons_input2)/float(len(cons_input2))
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1],'%.3f' %pp100,'%.3f' %avgpp100])
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %v_fdr[0],'%.3f' %v_fdr[1],'%.3f' %pp100,'%.3f' %avgpp100])
 	return
 
 
@@ -155,11 +158,13 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 		if len(wt)==1 and len(nw)==1:
 			X=[seq_input + cons_input1+ cons_input2 ]
 			y_pred,y_fdrs,c_pred=prediction(X,model1)
+			v_fdr=[y_fdrs[0][0],y_fdrs[0][1]]
 		else:
 			p_cod=0
 			if r_cod!=[]: p_cod=1
 			X=[seq_input + cons_input1+ cons_input2 + [lwt, lnw, p_cod]]
-			y_pred,y_fdrs,c_pred=prediction(X,model2)		
+			y_pred,y_fdrs,c_pred=prediction(X,model2)
+			v_fdr=[y_fdrs[0][2],y_fdrs[0][3]]
 		if y_pred==[]:
 			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
 			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
@@ -167,7 +172,7 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 		pp100=cons_input2[win]
 		avgpp100=sum(cons_input2)/float(len(cons_input2))	
 		#print pp100,avgpp100,cons_input2
-		print line+'\t'+'%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f' %(c_pred[0],y_pred[0],y_fdrs[0][0],y_fdrs[0][1],pp100,avgpp100)
+		print line+'\t'+'%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f' %(c_pred[0],y_pred[0],v_fdr[0],v_fdr[1],pp100,avgpp100)
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
 		c=c+1
 	return 
@@ -252,18 +257,20 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win
 			if len(wt)==1 and len(inw)==1:
 				X=[seq_input + cons_input1+ cons_input2 ]
 				y_pred,y_fdrs,c_pred=prediction(X,model1)
+				v_fdr=[y_fdrs[0][0],y_fdrs[0][1]]
 			else:
 				p_cod=0
 				if r_cod!=[]: p_cod=1
 				X=[seq_input + cons_input1+ cons_input2 + [lwt, lnw, p_cod]]
-				y_pred,y_fdrs,c_pred=prediction(X,model2)		
+				y_pred,y_fdrs,c_pred=prediction(X,model2)
+				v_fdr=[y_fdrs[0][2],y_fdrs[0][3]]
 			if y_pred==[]:
 				print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
 				list_pred.append(6*['NA'])
 				continue
 			pp100=cons_input2[win]
 			avgpp100=sum(cons_input2)/float(len(cons_input2))
-			list_pred.append(['%s' %c_pred[0],'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1],'%.3f' %pp100,'%.3f' %avgpp100])
+			list_pred.append(['%s' %c_pred[0],'%.3f' %y_pred[0],'%.3f' %v_fdr[0],'%.3f' %v_fdr[1],'%.3f' %pp100,'%.3f' %avgpp100])
 		#print list_pred
 		if list_pred==[]:
 			out_data=6*('NA',)
@@ -345,11 +352,13 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 		if len(wt)==1 and len(nw)==1:
 			X=[seq_input + cons_input1+ cons_input2 ]
 			y_pred,y_fdrs,c_pred=prediction(X,model1)
+			v_fdr=[y_fdrs[0][0],y_fdrs[0][1]]
 		else:
 			p_cod=0
 			if r_cod!=[]: p_cod=1
 			X=[seq_input + cons_input1+ cons_input2 + [lwt, lnw, p_cod]]
-			y_pred,y_fdrs,c_pred=prediction(X,model2)		
+			y_pred,y_fdrs,c_pred=prediction(X,model2)
+			v_fdr=[y_fdrs[0][2],y_fdrs[0][3]]		
 		if y_pred==[]:
 			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
 			#print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
@@ -357,7 +366,7 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 		pp100=cons_input2[win]
 		avgpp100=sum(cons_input2)/float(len(cons_input2))	
 		#print pp100,avgpp100,cons_input2
-		print line+'\t'+'%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f' %(c_pred[0],y_pred[0],y_fdrs[0][0],y_fdrs[0][1],pp100,avgpp100)
+		print line+'\t'+'%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f' %(c_pred[0],y_pred[0],v_fdr[0],v_fdr[1],pp100,avgpp100)
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
 		c=c+1
 	return 
@@ -413,18 +422,20 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 		if len(wt)==1 and len(nw)==1:
 			X=[seq_input + cons_input1+ cons_input2 ]
 			y_pred,y_fdrs,c_pred=prediction(X,model1)
+			v_fdr=[y_fdrs[0][0],y_fdrs[0][1]]
 		else:
 			p_cod=0
 			if r_cod!=[]: p_cod=1
 			X=[seq_input + cons_input1+ cons_input2 + [lwt, lnw, p_cod]]
 			y_pred,y_fdrs,c_pred=prediction(X,model2)
+			v_fdr=[y_fdrs[0][2],y_fdrs[0][3]]
 		if y_pred==[]:
 			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
 			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		pp100=cons_input2[win]
 		avgpp100=sum(cons_input2)/float(len(cons_input2))
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %y_fdrs[0][0],'%.3f' %y_fdrs[0][1],pp100,avgpp100])	
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %v_fdr[0],'%.3f' %v_fdr[1],pp100,avgpp100])	
 	return 
 
 
