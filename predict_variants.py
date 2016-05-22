@@ -474,7 +474,7 @@ def get_options():
 	parser.add_option('--pass', action='store_true', dest='fpass', default=False, help='Predict only PASS variants. Check column 7 in vcf file')
 	(options, args) = parser.parse_args()
 	outfile = ''
-	modfile = [prog_dir + '/data/model/snv_model_w5_p7_500.pkl',prog_dir + '/data/model/indel_model_w5_p7_500.pkl']
+	#modfile = [prog_dir + '/data/model/snv_model_w5_p7_500.pkl',prog_dir + '/data/model/indel_model_w5_p7_500.pkl']
 	hg='hg38'
 	coord=False
 	vcf=False
@@ -491,11 +491,13 @@ def get_options():
 		fasta=hg19['fasta']
 		dbpps=[hg19['phylop'][0],hg19['phylop'][2]]
 		pklcod=cod=hg19['coding']
+		modfile = [prog_dir + '/data/model/snv_model_w5_p7_500_hg19.pkl',prog_dir + '/data/model/indel_model_w5_p7_500_hg19.pkl']
 	else:
 		fasta=hg38['fasta']
 		dbpps=[hg38['phylop'][0],hg38['phylop'][2]]
 		#dbpps=hg38['phylop']+hg38['phastc']
 		pklcod=hg38['coding']
+		modfile = [prog_dir + '/data/model/snv_model_w5_p7_500_hg38.pkl',prog_dir + '/data/model/indel_model_w5_p7_500_hg38.pkl']
 	if not os.path.isfile(modfile[0]) or not os.path.isfile(modfile[1]):
                 print >> sys.stderr,'ERROR: Data model files not found'
 		sys.exit(1)
