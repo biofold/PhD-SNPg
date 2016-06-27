@@ -12,7 +12,7 @@ def global_vars():
 	prog_dat = prog_dir + '/data/model'
 	ucsc_dir = prog_dir+'/ucsc'
 	ucsc_exe = ucsc_dir+'/exe'
-	sys.path.append(tool_dir)
+	sys.path.insert(0,tool_dir)
 	hg19={}
 	hg19['fasta']='hg19.2bit'
 	hg19['phylop']=['hg19.phyloP46way.primate.bw','hg19.phyloP46way.placental.bw', \
