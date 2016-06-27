@@ -71,7 +71,7 @@ def setup(arch_type,hg='all'):
 		print >> sys.stderr, "ERROR: Command wget not available."
 		print sys.exit(1)
 	print '\n2) Check joblib'
-	cmd='python -c \'from sklearn.externals import joblib\''
+	cmd='cd '+prog_dir+'/tools; python -c \'import joblib\''
 	print cmd
 	out=getstatusoutput(cmd)
 	print out[1]
@@ -103,7 +103,7 @@ def test():
 	test_dir = prog_dir+'/test'
 	ucsc_tool =  ucsc_dir+'/exe'
 	print '1) Test python libray scikit-learn'
-	cmd='python -c \'from sklearn.externals import joblib; print joblib.__doc__\''
+	cmd='cd '+prog_dir+'/tools; python -c \'import joblib; print joblib.__doc__\''
 	print cmd
 	out=getstatusoutput(cmd+' |head -n 9')
 	print out[1]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os, sys, pickle
 from commands import getstatusoutput
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
 
 
 def global_vars():
@@ -12,6 +12,7 @@ def global_vars():
 	prog_dat = prog_dir + '/data/model'
 	ucsc_dir = prog_dir+'/ucsc'
 	ucsc_exe = ucsc_dir+'/exe'
+	sys.path.append(tool_dir)
 	hg19={}
 	hg19['fasta']='hg19.2bit'
 	hg19['phylop']=['hg19.phyloP46way.primate.bw','hg19.phyloP46way.placental.bw', \
@@ -419,6 +420,7 @@ def get_options():
 
 if __name__ == '__main__':
 	global_vars()
+	import joblib
 	args,opts=get_options()
 	(outfile,modfile,win,hg,fasta,dbpps,pklcod)=opts
 	ucsc_dbs=ucsc_dir+'/'+hg

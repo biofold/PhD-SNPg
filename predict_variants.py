@@ -2,8 +2,7 @@
 import os, sys, subprocess, pickle
 import  __builtin__
 from commands import getstatusoutput
-from sklearn.externals import joblib
-
+#from sklearn.externals import joblib
 
 def global_vars():
 	global tool_dir, prog_dir, prog_dat, ucsc_dir, ucsc_exe, verbose, hg19, hg38, prog_cat
@@ -491,13 +490,13 @@ def get_options():
 		fasta=hg19['fasta']
 		dbpps=[hg19['phylop'][0],hg19['phylop'][2]]
 		pklcod=cod=hg19['coding']
-		modfile = [prog_dir + '/data/model/snv_model_w5_p7_500_hg19.pkl',prog_dir + '/data/model/indel_model_w5_p7_500_hg19.pkl']
+		modfile = [prog_dat + '/snv_model_w5_p7_500_hg19.pkl',prog_dat + '/indel_model_w5_p7_500_hg19.pkl']
 	else:
 		fasta=hg38['fasta']
 		dbpps=[hg38['phylop'][0],hg38['phylop'][2]]
 		#dbpps=hg38['phylop']+hg38['phastc']
 		pklcod=hg38['coding']
-		modfile = [prog_dir + '/data/model/snv_model_w5_p7_500_hg38.pkl',prog_dir + '/data/model/indel_model_w5_p7_500_hg38.pkl']
+		modfile = [prog_dat + '/snv_model_w5_p7_500_hg38.pkl',prog_dat + '/indel_model_w5_p7_500_hg38.pkl']
 	if not os.path.isfile(modfile[0]) or not os.path.isfile(modfile[1]):
                 print >> sys.stderr,'ERROR: Data model files not found'
 		sys.exit(1)
@@ -508,6 +507,7 @@ def get_options():
 
 if __name__ == '__main__':
 	global_vars()
+	import joblib
 	from score_variants import parse_variants, get_snv_input, get_indel_input	
 	args,opts=get_options()
 	(outfile,modfile,fasta,dbpps,pklcod)=opts
