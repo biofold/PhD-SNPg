@@ -34,16 +34,12 @@ MANUAL INSTALLATION
       1) Download PhD-SNPg script from github
         - git clone https://github.com/biofold/PhD-SNPg.git
 
-      2) Required python libraries: scikit-learn-0.17 and joblib-0.9.4
+      2) Required python libraries: scikit-learn-0.17
 	  They are already available in tools directory.
 
 	- Untar the scikit-learn-0.17.tar.gz directory and run
           python setup.py install --install-lib=../
 	  https://pypi.python.org/simple/scikit-learn/
-
-	- Untar joblib-0.9.4.tar.gz
-	  They are already available in tools directory.
-	  https://pypi.python.org/simple/joblib
 
       3) Required UCSC tools and data:
         - bigWigToBedGraph and twoBitToFa from

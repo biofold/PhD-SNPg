@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os, sys, pickle
 from commands import getstatusoutput
-#from sklearn.externals import joblib
 
 
 def global_vars():
@@ -420,7 +419,7 @@ def get_options():
 
 if __name__ == '__main__':
 	global_vars()
-	import joblib
+	from sklearn.externals import joblib
 	args,opts=get_options()
 	(outfile,modfile,win,hg,fasta,dbpps,pklcod)=opts
 	ucsc_dbs=ucsc_dir+'/'+hg

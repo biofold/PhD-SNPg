@@ -2,7 +2,6 @@
 import os, sys, subprocess, pickle
 import  __builtin__
 from commands import getstatusoutput
-#from sklearn.externals import joblib
 
 def global_vars():
 	global tool_dir, prog_dir, prog_dat, ucsc_dir, ucsc_exe, verbose, hg19, hg38, prog_cat
@@ -507,7 +506,7 @@ def get_options():
 
 if __name__ == '__main__':
 	global_vars()
-	import joblib
+	from sklearn.external import joblib
 	from score_variants import parse_variants, get_snv_input, get_indel_input	
 	args,opts=get_options()
 	(outfile,modfile,fasta,dbpps,pklcod)=opts

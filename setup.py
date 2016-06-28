@@ -70,7 +70,7 @@ def setup(arch_type,hg='all'):
 	if out[0]!=0:
 		print >> sys.stderr, "ERROR: Command wget not available."
 		print sys.exit(1)
-	print '\n2) Compile scikit-learn-0.17 and check joblib-0.9.4'
+	print '\n2) Compile scikit-learn-0.17 and check joblib'
         cmd='cd '+prog_dir+'/tools/; tar -xzvf scikit-learn-0.17.tar.gz;' 
 	cmd=cmd+'cd scikit-learn-0.17; python setup.py install --install-lib='+prog_dir+'/tools;'
 	print cmd
@@ -79,7 +79,7 @@ def setup(arch_type,hg='all'):
         if out[0]!=0:
                 print >> sys.stderr, "ERROR: scikit-learn istallation failed."
                 sys.exit(1)	
-        cmd='cd '+prog_dir+'/tools; tar -xzvf joblib-0.9.4.tar.gz; python -c \'import joblib\''
+        cmd='python -c \'from sklearn.externals import joblib\''
 	print cmd
 	out=getstatusoutput(cmd)
 	print out[1]
