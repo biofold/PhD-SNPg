@@ -506,7 +506,7 @@ def get_options():
 
 if __name__ == '__main__':
 	global_vars()
-	from sklearn.external import joblib
+	from sklearn.externals import joblib
 	from score_variants import parse_variants, get_snv_input, get_indel_input	
 	args,opts=get_options()
 	(outfile,modfile,fasta,dbpps,pklcod)=opts
