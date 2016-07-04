@@ -253,12 +253,14 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 		v_fdr=[y_fdrs[0][2],y_fdrs[0][3]]
 	if y_pred==[]:
 		print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
-		print '\t'.join([str(i) for i in [ichr,ipos,wt+','+nw] ])+'\tNA\tNA\tNA\tNA\tNA\tNA'
+		print '\t'.join([str(i) for i in [ichr,ipos,wt+','+nw] ])+'\tNA\tNA\tNA\tNA\tNA'
 	else:
-		print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\t1-NPV\tPhyloP100\tAvgPhyloP100"
+		print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100"
 		pp100=cons_input2[win]
 		avgpp100=sum(cons_input2)/float(len(cons_input2))
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %v_fdr[0],'%.3f' %v_fdr[1],'%.3f' %pp100,'%.3f' %avgpp100])
+		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
+		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,'%.3f' %pp100,'%.3f' %avgpp100])
 	return
 
 
@@ -305,7 +307,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 	model2=joblib.load(modfile[1])
 	f=open(namefile)
 	c=1
-	print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\t1-NPV\tPhyloP100\tAvgPhyloP100"
+	print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100"
 	for line in f:	
 		v=line.rstrip().split(s)
 		if len(v)<4: print >> sys.stderr,'WARNING: Incorrect line ',c,line.rstrip()
@@ -325,7 +327,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 		if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
 			print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw		
 		if wt==nw or nw.find(',')>-1:
-			print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'NA','NA','NA','NA','NA','NA'])
+			print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'NA','NA','NA','NA','NA'])
 			continue
 		if len(wt)==1 and len(nw)==1:
 			r_cod=[]
@@ -339,7 +341,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 			cons_input2=cons_input[1]
 		else:
 			print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
-			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if cons_input1==[] or cons_input2==[]: print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
 		if len(wt)==1 and len(nw)==1:
@@ -354,11 +356,13 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 			v_fdr=[y_fdrs[0][2],y_fdrs[0][3]]
 		if y_pred==[]:
 			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
-			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA'
 			continue
 		pp100=cons_input2[win]
 		avgpp100=sum(cons_input2)/float(len(cons_input2))
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %v_fdr[0],'%.3f' %v_fdr[1],pp100,avgpp100])	
+		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
+		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,pp100,avgpp100])	
 	return 
 
 
