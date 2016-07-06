@@ -4,13 +4,18 @@ from commands import getstatusoutput
 
 
 def global_vars():
-	global tool_dir, prog_dir, ucsc_dir, ucsc_exe, prog_dat, verbose, hg19, hg38
+	global tool_dir, prog_dir, ucsc_dir, ucsc_exe, ucsc_web, prog_dat, verbose, hg19, hg38, biofold
 	verbose = False
 	tool_dir = os.path.dirname(os.path.abspath(__file__))
 	prog_dir = '/'.join(tool_dir.split('/')[:-1])
 	prog_dat = prog_dir + '/data/model'
 	ucsc_dir = prog_dir+'/ucsc'
 	ucsc_exe = ucsc_dir+'/exe'
+	ucsc = 'http://hgdownload.cse.ucsc.edu/goldenPath'
+        biofold = 'http://snps.biofold.org/PhD-SNPg/ucsc'
+        ucsc_web = {'hg19.2bit':ucsc+'/hg19/bigZips','hg38.2bit':ucsc+'/hg38/bigZips',\
+		'hg19.phyloP46way.primate.bw':biofold+'/hg19','hg19.phyloP46way.placental.bw':biofold+'/hg19','hg19.100way.phyloP100way.bw':ucsc+'/hg19/phyloP100way',\
+		'hg38.phyloP7way.bw':ucsc+'/hg38/phyloP7way','hg38.phyloP20way.bw':ucsc+'/hg38/phyloP20way','hg38.phyloP100way.bw':ucsc+'/hg38/phyloP100way'}
 	sys.path.insert(0,tool_dir)
 	hg19={}
 	hg19['fasta']='hg19.2bit'
@@ -25,14 +30,16 @@ def global_vars():
 	return
 
 
-def parse_variants(ichr,pos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta='hg38.2bit',fprog='twoBitToFa',wseq=100):
+def parse_variants(ichr,pos,wt,nw,ucsc_exe,ucsc_dbs,web=False,dbfasta='hg38.2bit',fprog='twoBitToFa',wseq=100):
 	ipos=pos-1
 	n_pos=pos
 	n_wt=''
 	n_nw=''
 	if wt=='-': wt=''
 	if nw=='-': nw=''
-	cmd=ucsc_exe+'/'+fprog+' '+ucsc_dbs+'/'+dbfasta+' stdout -seq='+ichr+' -start='+str(ipos)+' -end='+str(ipos+wseq)+' | grep -v "^>" | tr -d "\n" '
+	db_file=ucsc_dbs+'/'+dbfasta
+	if web: db_file=ucsc_web[dbfasta]+'/'+dbfasta
+	cmd=ucsc_exe+'/'+fprog+' '+db_file+' stdout -seq='+ichr+' -start='+str(ipos)+' -end='+str(ipos+wseq)+' | grep -v "^>" | tr -d "\n" '
 	out=getstatusoutput(cmd)
         if out[0]!=0:
                 print >> sys.stderr,'ERROR: Sequence fetch -', out[1]
@@ -65,13 +72,15 @@ def check_seq(seq,slen,right=True):
 	return seq.upper()
 
 
-def get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win=2,dbname='hg38.2bit',prog='twoBitToFa'):
+def get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,web=False,win=2,dbname='hg38.2bit',prog='twoBitToFa'):
 	nuc=''
 	seq=''
 	s=max(0,ipos-win)
 	e=ipos+win+1
-	cmd1=ucsc_exe+'/'+prog+' '+ucsc_dbs+'/'+dbname+' stdout -seq='+ichr+' -start='+str(s)+' -end='+str(ipos+1)+' | grep -v "^>" | tr -d "\n" '
-	cmd2=ucsc_exe+'/'+prog+' '+ucsc_dbs+'/'+dbname+' stdout -seq='+ichr+' -start='+str(ipos)+' -end='+str(e)+' | grep -v "^>" | tr -d "\n" '
+	db_file=ucsc_dbs+'/'+dbname
+	if web: db_file=ucsc_web[dbname]+'/'+dbname
+	cmd1=ucsc_exe+'/'+prog+' '+db_file+' stdout -seq='+ichr+' -start='+str(s)+' -end='+str(ipos+1)+' | grep -v "^>" | tr -d "\n" '
+	cmd2=ucsc_exe+'/'+prog+' '+db_file+' stdout -seq='+ichr+' -start='+str(ipos)+' -end='+str(e)+' | grep -v "^>" | tr -d "\n" '
 	if verbose: print >> sys.stderr, cmd1
 	if verbose: print >> sys.stderr, cmd2
 	out1=getstatusoutput(cmd1)
@@ -118,12 +127,14 @@ def check_conservation(cons,win=2):
 	return cons
 
 
-def get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win=2,dbname='hg38.phyloP100way.bw',prog='bigWigToBedGraph'):
+def get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,web=False,win=2,dbname='hg38.phyloP100way.bw',prog='bigWigToBedGraph'):
 	s=max(0,ipos-win)
         e=ipos+win+1
 	v=[]
 	for i in range(s,e):
-		cmd=ucsc_exe+'/'+prog+' '+ucsc_dbs+'/'+dbname+' stdout -chrom='+ichr+' -start='+str(i)+' -end='+str(i+1)
+		db_file=ucsc_dbs+'/'+dbname
+		if web: db_file=ucsc_web[dbname]+'/'+dbname
+		cmd=ucsc_exe+'/'+prog+' '+db_file+' stdout -chrom='+ichr+' -start='+str(i)+' -end='+str(i+1)
 		if verbose: print >> sys.stderr, cmd
 		out=getstatusoutput(cmd)
 		if out[0]!=0:
@@ -137,7 +148,7 @@ def get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win=2,dbname='hg38.phyloP100way
 	return cons
 
 
-def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	# for 0 starting genome
 	nuc=''
 	seq=''
@@ -146,15 +157,15 @@ def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit'
 	cons_input2=[]
 	#Set genome starting position to 0
 	ipos=ipos-1
-	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbfasta,fprog)
+	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbfasta,fprog)
 	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input1,cons_input2
         seq_input=get_seqinput(seq,wt,nw,win)
-        cons_input1=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpps[0],cprog)
+        cons_input1=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpps[0],cprog)
         cons_input2=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpps[1],cprog)
 	return nuc,seq,seq_input,cons_input1,cons_input2
 
 
-def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	# for 0 starting genome
 	nuc=''
 	seq=''
@@ -162,16 +173,16 @@ def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',db
 	cons_input=[]
 	#Set genome starting position to 0
 	ipos=ipos-1
-	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbfasta,fprog)
+	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbfasta,fprog)
 	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input
 	seq_input=get_seqinput(seq,wt,nw,win)
 	for dbpp in dbpps:
-		cons=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpp,cprog)
+		cons=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpp,cprog)
 		cons_input.append(cons)
 	return nuc,seq,seq_input,cons_input
 
 
-def get_indel_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def get_indel_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	# for 0 starting genome        
 	nuc=''
 	seq=''
@@ -180,11 +191,11 @@ def get_indel_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',
 	r_cod=[]
 	#Set genome starting position to 0        
 	ipos=ipos-1
-	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbfasta,fprog)
+	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbfasta,fprog)
 	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input,r_cod	
 	seq_input=get_seqinput(seq,wt,nw,win)
 	for dbpp in dbpps:
-		cons=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpp,cprog)
+		cons=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpp,cprog)
 		cons_input.append(cons)
         if pklcod!='': r_cod=get_coding_range(ichr,ipos,ucsc_exe,ucsc_dbs,pklcod)
 	return nuc,seq,seq_input,cons_input,r_cod
@@ -204,7 +215,7 @@ def get_coding_range(ichr,ipos,ucsc_exe,ucsc_dbs,pklcod):
 	return r_cod	
 
 
-def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	lwt=len(wt)
 	lnw=len(nw)
 	if wt=='-':
@@ -213,7 +224,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 	if nw=='-':
 		lwt+=1
 		lnw=1
-	n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+	n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
 	if n_wt=='' or n_nw=='':
 		print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 		sys.exit()
@@ -222,9 +233,9 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 		sys.exit()
 	if pklcod=='':
 		r_cod=[]
-		(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,fprog,cprog)
+		(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,fprog,cprog)
 	else:
-		(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
+		(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 	if seq=='': 
 		print >> sys.stderr, 'ERROR: Sequence not found for position',ichr,ipos
 		sys.exit(1)
@@ -264,7 +275,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 	return
 
 
-def get_file_input(namefile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	vlines=[]
 	f=open(namefile)
 	c=1
@@ -281,12 +292,12 @@ def get_file_input(namefile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfasta='hg38.2bit',d
 		if nw=='-':
 			lwt+=1
 			lnw=1
-		n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+		n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
 		if n_wt=='' or n_nw=='':
 			print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 		if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
 			print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw
-		(nuc,seq,seq_input,cons_input,r_cod)=get_indels_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,pklcod,dbpps,fprog,cprog)
+		(nuc,seq,seq_input,cons_input,r_cod)=get_indels_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,pklcod,dbpps,fprog,cprog)
 		cons_input1=cons_input[0]
 		cons_input2=cons_input[1]
 		if seq=='': 
@@ -302,7 +313,7 @@ def get_file_input(namefile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfasta='hg38.2bit',d
 	return vlines
 		
 
-def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	model1=joblib.load(modfile[0])
 	model2=joblib.load(modfile[1])
 	f=open(namefile)
@@ -321,7 +332,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 		if nw=='-':
 			lwt+=1
 			lnw=1
-		n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+		n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
 		if n_wt=='' or n_nw=='':
 			print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 		if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
@@ -331,9 +342,9 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 			continue
 		if len(wt)==1 and len(nw)==1:
 			r_cod=[]
-			(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,fprog,cprog)
+			(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,fprog,cprog)
 		else: 
-			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
+			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		if seq=='': print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos		
 		if seq_input==[]: print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
 		if cons_input!=[]:
@@ -395,10 +406,13 @@ def get_options():
 	parser.add_option('-m','--mod-file', action='store', type='string', dest='mfile', help='Model file')
 	parser.add_option('-g','--genome', action='store', type='string', dest='hg', default='hg38', help='Genome version')
 	parser.add_option('-w','--win', action='store', type='int', dest='win', help='Window length')
+	parser.add_option('--web', action='store_true', dest='web', default=False, help='Use UCSC web files')
+	
 	(options, args) = parser.parse_args()
 	outfile=''
 	modfile=''
 	hg='hg38'
+	web=False
 	win=2
 	if options.mfile: 
 		modfile=options.mfile
@@ -406,6 +420,7 @@ def get_options():
 			print >> sys.stderr,'ERROR: Modfile',modfile,'not found.'
 			sys.exit(1)
 	if options.hg.lower()=='hg19': hg='hg19'
+	if options.web: web=True
 	if options.win>0: win=options.win
 	if hg=='hg19':
 		fasta=hg19['fasta']
@@ -416,7 +431,7 @@ def get_options():
 		dbpps=[hg38['phylop'][0],hg38['phylop'][2]]
 		#dbpps=hg38['phylop']+hg38['phastc']
 		pklcod=hg38['coding']
-	opts=(outfile,modfile,win,hg,fasta,dbpps,pklcod)
+	opts=(outfile,modfile,web,win,hg,fasta,dbpps,pklcod)
 	return args,opts
 
 
@@ -425,7 +440,7 @@ if __name__ == '__main__':
 	global_vars()
 	from sklearn.externals import joblib
 	args,opts=get_options()
-	(outfile,modfile,win,hg,fasta,dbpps,pklcod)=opts
+	(outfile,modfile,web,win,hg,fasta,dbpps,pklcod)=opts
 	ucsc_dbs=ucsc_dir+'/'+hg
 	if len(args)>1:
 		ichr=sys.argv[1]
@@ -452,14 +467,14 @@ if __name__ == '__main__':
 			if nw=='-':
 				lwt+=1
 				lnw=1
-			n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,fasta)
+			n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,fasta)
 			if n_wt=='' or n_nw=='':
 				print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 				sys.exit()
 			if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
 				print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw
 				sys.exit()	
-			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ochr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,fasta,dbpps,pklcod)
+			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ochr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
 			if seq_input!=[] and cons_input.count([])==0: 
 				chr_data='\t'.join([ichr,str(ipos),str(n_pos),wt+','+nw,n_wt+str(n_pos)+n_nw,seq])
 				seq_data='\t'.join([str(i) for i in seq_input])
@@ -475,5 +490,5 @@ if __name__ == '__main__':
 				print >> sys.stderr, 'ERROR: Variants',ichr,ipos,wt+','+nw
 		else:
 			if len(wt)==1 and len(nw)==1: pklcod=''	
-			make_prediction(ochr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpps,pklcod)
+			make_prediction(ochr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
 				

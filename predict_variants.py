@@ -4,13 +4,19 @@ import  __builtin__
 from commands import getstatusoutput
 
 def global_vars():
-	global tool_dir, prog_dir, prog_dat, ucsc_dir, ucsc_exe, verbose, hg19, hg38, prog_cat
+	global tool_dir, prog_dir, prog_dat, ucsc_dir, ucsc_exe, ucsc_web, verbose, hg19, hg38, prog_cat, biofold
 	prog_dir = os.path.dirname(os.path.abspath(__file__))
 	tool_dir = prog_dir+'/tools'
 	prog_dat = prog_dir+'/data/model'
 	ucsc_dir = prog_dir+'/ucsc'
 	ucsc_exe = ucsc_dir+'/exe'
 	prog_cat = 'zcat'
+	ucsc = 'http://hgdownload.cse.ucsc.edu/goldenPath'
+        biofold = 'http://snps.biofold.org/PhD-SNPg/ucsc'
+	ucsc_web = {'hg19.2bit':ucsc+'/hg19/bigZips','hg38.2bit':ucsc+'/hg38/bigZips',\
+		'hg19.phyloP46way.primate.bw':biofold+'/hg19','hg19.phyloP46way.placental.bw':biofold+'/hg19','hg19.100way.phyloP100way.bw':ucsc+'/hg19/phyloP100way',\
+		'hg38.phyloP7way.bw':ucsc+'/hg38/phyloP7way','hg38.phyloP20way.bw':ucsc+'/hg38/phyloP20way','hg38.phyloP100way.bw':ucsc+'/hg38/phyloP100way'}
+	__builtin__.ucsc_web=ucsc_web
 	sys.path.insert(0,tool_dir)
 	hg19={}
 	hg19['fasta']='hg19.2bit'
@@ -24,7 +30,7 @@ def global_vars():
 
 
 
-def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	lwt=len(wt)
 	lnw=len(nw)
 	if wt=='-':
@@ -33,7 +39,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 	if nw=='-':
 		lwt+=1
 		lnw=1
-	n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+	n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
 	if n_wt=='' or n_nw=='':
 		print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 		sys.exit()
@@ -42,9 +48,9 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 		sys.exit()
 	if pklcod=='':
 		r_cod=[]
-		(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,fprog,cprog)
+		(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,fprog,cprog)
 	else:
-		(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
+		(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 	if seq=='': 
 		print >> sys.stderr, 'ERROR: Sequence not found for position',ichr,ipos
 		sys.exit(1)
@@ -84,7 +90,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg3
 	return
 
 
-def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	model1=joblib.load(modfile[0])
 	model2=joblib.load(modfile[1])	
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -123,16 +129,16 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 		if nw=='-':
 			lwt+=1
 			lnw=1
-		n_wt,n_nw,n_pos=parse_variants(nchr,ipos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+		n_wt,n_nw,n_pos=parse_variants(nchr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
 		if n_wt=='' or n_nw=='':
 			print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 		if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
 			print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw		
 		if len(wt)==1 and len(nw)==1:
 			r_cod=[]
-			(nuc,seq,seq_input,cons_input)=get_snv_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,fprog,cprog)
+			(nuc,seq,seq_input,cons_input)=get_snv_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,fprog,cprog)
 		else: 
-			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
+			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		if seq=='': 
 			print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos
 			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
@@ -180,7 +186,7 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 	return 
 
 
-def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	model1=joblib.load(modfile[0])
 	model2=joblib.load(modfile[1])
 	list_pred=[]	
@@ -224,16 +230,16 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win
 			if inw=='-':
 				lwt+=1
 				lnw=1
-			n_wt,n_nw,n_pos=parse_variants(nchr,ipos,wt,inw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+			n_wt,n_nw,n_pos=parse_variants(nchr,ipos,wt,inw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
 			if n_wt=='' or n_nw=='':
 				print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,inw
 			if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
 				print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,inw		
 			if len(wt)==1 and len(inw)==1:
 				r_cod=[]
-				(nuc,seq,seq_input,cons_input)=get_snv_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,fprog,cprog)
+				(nuc,seq,seq_input,cons_input)=get_snv_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,fprog,cprog)
 			else: 
-				(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
+				(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 			if seq=='': 
 				print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos
 				list_pred.append(6*['NA'])
@@ -287,7 +293,7 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win
 	return 
 
 
-def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	model1=joblib.load(modfile[0])
 	model2=joblib.load(modfile[1])	
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -321,16 +327,16 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 		if nw=='-':
 			lwt+=1
 			lnw=1
-		n_wt,n_nw,n_pos=parse_variants(nchr,ipos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+		n_wt,n_nw,n_pos=parse_variants(nchr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
 		if n_wt=='' or n_nw=='':
 			print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 		if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
 			print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw		
 		if len(wt)==1 and len(nw)==1:
 			r_cod=[]
-			(nuc,seq,seq_input,cons_input)=get_snv_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,fprog,cprog)
+			(nuc,seq,seq_input,cons_input)=get_snv_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,fprog,cprog)
 		else: 
-			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
+			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(nchr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		if seq=='': 
 			print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos
 			#print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
@@ -379,7 +385,7 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,dbfasta='h
 
 
 
-def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	model1=joblib.load(modfile[0])
 	model2=joblib.load(modfile[1])
 	f=open(namefile)
@@ -402,7 +408,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 		if nw=='-':
 			lwt+=1
 			lnw=1
-		n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,dbfasta,fprog)
+		n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
 		if n_wt=='' or n_nw=='':
 			print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 		if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
@@ -412,9 +418,9 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win=2,s='\t',dbfast
 			continue
 		if len(wt)==1 and len(nw)==1:
 			r_cod=[]
-			(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,fprog,cprog)
+			(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,fprog,cprog)
 		else: 
-			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,fprog,cprog)
+			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		if seq=='': print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos		
 		if seq_input==[]: print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
 		if cons_input!=[]:
@@ -470,7 +476,7 @@ def prediction(X,model,fdr_file='fdr_mean.pkl'):
 
 
 def get_options():
-	global hg, coord, vcf, fpass, win
+	global hg, coord, vcf, fpass, web, win
 	import optparse
 	desc = 'Script for scoring single nucleotide variants'
 	parser = optparse.OptionParser("usage: %prog variant_file", description=desc)
@@ -479,6 +485,7 @@ def get_options():
 	parser.add_option('-v','--verbose', action='store_true', dest='ver', default=False, help='Verbose mode')
 	parser.add_option('-c','--coordinate', action='store_true', dest='coord', default=False, help='Coordinate input')
 	parser.add_option('--vcf', action='store_true', dest='vcf', default=False, help='VCF file input')
+	parser.add_option('--web', action='store_true', dest='web', default=False, help='Use UCSC web files')
 	parser.add_option('--pass', action='store_true', dest='fpass', default=False, help='Predict only PASS variants. Check column 7 in vcf file')
 	(options, args) = parser.parse_args()
 	outfile = ''
@@ -487,11 +494,13 @@ def get_options():
 	coord=False
 	vcf=False
 	fpass=False
+	web=False
 	win=2
 	if options.mfile: modfile=options.mfile
 	if options.hg.lower()=='hg19': hg='hg19'
 	if options.coord: coord = True
 	if options.fpass: fpass=True
+	if options.web: web=True
 	if options.vcf: vcf = True
 	__builtin__.verbose=False
 	if options.ver: __builtin__.verbose=True
@@ -536,15 +545,15 @@ if __name__ == '__main__':
 				pred_model=modfile[0]
 			else:
 				pred_model=modfile[1]
-			make_prediction(ochr,ipos,wt,nw,pred_model,ucsc_exe,ucsc_dbs,win,fasta,dbpps,pklcod)
+			make_prediction(ochr,ipos,wt,nw,pred_model,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
 		else:	
 			namefile=args[0]
 			if not os.path.isfile(namefile):
 				print >> sys.stderr,'ERROR: Input file not found',namefile
 				sys.exit(1)
 			if vcf:
-				make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpps,pklcod)
+				make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
 			else:
-				make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,win,fasta,dbpps,pklcod)
+				make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
 	else:
 		print 'predict_variants.py variant_file'
