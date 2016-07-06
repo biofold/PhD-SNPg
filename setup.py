@@ -127,25 +127,37 @@ def test():
 		print >> sys.stderr,'ERROR: Command zcat not available'
 		sys.exit(1)
 	print '\n3) Check hg19 files'
-	files=['hg19.2bit','hg19.100way.phyloP100way.bw','hg19.phyloP46way.primate.bw']
-	for i in files:
-		cmd='ls '+ucsc_dir+'/hg19/'+i
-		print cmd
-		out=getstatusoutput(cmd)
-		print out[1]
-		if out[0]!=0:		
-			print >> sys.stderr,'WARNING: Not found file',i
-			if 'hg19' in hgs: hgs.remove('hg19')
+        cmd='cd '+ucsc_dir+'/hg19/; md5sum -c hg19.md5'
+	print cmd
+	out=getstatusoutput(cmd)
+	print out[1]
+	if out[0]!=0:
+		print >> sys.stderr,'WARNING: md5sum failed on hg19'
+	#files=['hg19.2bit','hg19.100way.phyloP100way.bw','hg19.phyloP46way.primate.bw']
+	#for i in files:
+	#	cmd='ls '+ucsc_dir+'/hg19/'+i
+	#	print cmd
+	#	out=getstatusoutput(cmd)
+	#	print out[1]
+	#	if out[0]!=0:		
+	#		print >> sys.stderr,'WARNING: Not found file',i
+	#		if 'hg19' in hgs: hgs.remove('hg19')
 	print '\n4) Check hg38 files'
-	files=['hg38.2bit','hg38.phyloP100way.bw','hg38.phyloP7way.bw']
-	for i in files:
-		cmd='ls '+ucsc_dir+'/hg38/'+i
-		print cmd
-		out=getstatusoutput(cmd)
-		print out[1]
-		if out[0]!=0:
-			print >> sys.stderr,'WARNING: Not found file',i
-			if 'hg38' in hgs: hgs.remove('hg38')
+	cmd='cd '+ucsc_dir+'/hg38/; md5sum -c hg38.md5'
+	print cmd
+	out=getstatusoutput(cmd)
+	print out[1]
+	if out[0]!=0:
+		print >> sys.stderr,'WARNING: md5sum failed on hg38'
+	#files=['hg38.2bit','hg38.phyloP100way.bw','hg38.phyloP7way.bw']
+	#for i in files:
+	#	cmd='ls '+ucsc_dir+'/hg38/'+i
+	#	print cmd
+	#	out=getstatusoutput(cmd)
+	#	print out[1]
+	#	if out[0]!=0:
+	#		print >> sys.stderr,'WARNING: Not found file',i
+	#		if 'hg38' in hgs: hgs.remove('hg38')
 	if hgs==[]:
 		print >> sys.stderr,'ERROR: UCSC data file not correctly downloaded'
 		sys.exit()
