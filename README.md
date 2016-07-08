@@ -29,7 +29,7 @@ INSTALLATION
         python setup.py web_install arch_typ
 
       With the web_install option the PhD-SNPg
-      runs  without downloading the UCSC data.
+      runs without downloading the UCSC data.
       The functionality of the program depends 
       on the network speed..
 

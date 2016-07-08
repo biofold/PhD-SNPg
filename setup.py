@@ -1,5 +1,7 @@
 import os, sys
 from commands import getstatusoutput
+global ucsc_tool
+ucsc_tool='http://hgdownload.cse.ucsc.edu/admin/exe'
 
 
 def test():
@@ -15,16 +17,15 @@ def get_ucsc_tools(arch_type):
 	ucsc_dir = prog_dir+'/ucsc'
 	twobit='twoBitToFa'
 	bwg='bigWigToBedGraph'
-	ucsc_tool='http://hgdownload.cse.ucsc.edu/admin/exe/'
 	prog_get='wget'
 	wtwobit=ucsc_tool+'/'+arch_type+'/'+twobit
-	cmd=prog_get+' '+wtwobit+' -O '+ucsc_dir+'/exe/'+twobit+'; chmod a+x '+ucsc_dir+'/exe/*'
+	cmd=prog_get+' '+wtwobit+' -O '+ucsc_dir+'/exe/'+twobit+'; chmod a+x '+ucsc_dir+'/exe/'+twobit
 	print >> sys.stderr,'   Download twoBitToFa'
 	print cmd
 	out=getstatusoutput(cmd)
 	print out[1]
 	wbwg=ucsc_tool+'/'+arch_type+'/'+bwg
-	cmd=prog_get+' '+wbwg+' -O '+ucsc_dir+'/exe/'+bwg+'; chmod a+x '+ucsc_dir+'/exe/*'
+	cmd=prog_get+' '+wbwg+' -O '+ucsc_dir+'/exe/'+bwg+'; chmod a+x '+ucsc_dir+'/exe/'+bwg
 	print >> sys.stderr,'   Download bigWigToBedGraph'
 	print cmd
 	out=getstatusoutput(cmd)
@@ -37,7 +38,7 @@ def get_ucsc_tools(arch_type):
 	if out[0]!=0 and out[0]!=65280:
 		print >> sys.stderr,'  ERROR: Incorrect architecture',arch_type
 		cmd='rm '+ucsc_dir+'/exe/*'
-		outx=getstatusoutput(cmd)
+		getstatusoutput(cmd)
 	else:
 		print >> sys.stderr,'   Downloaded UCSC Tools'
 	return out
@@ -210,6 +211,12 @@ if __name__ == '__main__':
 		opt='install'
 	if opt=='install':
 		arch_type=sys.argv[2]
+		arch_list=['linux.x86_64.v287','linux.x86_64',\
+			'macOSX.x86_64','macOSX.i386','macOSX.ppc']
+		if arch_type not in arch_list:
+			print >> sys.stderr,'ERROR: Incorrect architecture type.'
+			print >> sys.stderr,'Available UCSC precomplied tools are only for '+', '.join(arch_list)
+			sys.exit(1)
 		hg='all'
 		if len(sys.argv)>3: hg=sys.argv[3]
 		setup(arch_type,hg,web)
