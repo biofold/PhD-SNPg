@@ -59,7 +59,7 @@ def get_ucsc_data(hg,namefile,odir,ucsc_dat='http://hgdownload.cse.ucsc.edu/gold
 	return out
 	
 
-def setup(arch_type,hg='all'):
+def setup(arch_type,hg='all',web=False):
 	prog_dir = os.path.dirname(os.path.abspath(__file__))
 	prog_get = 'wget'
 	print '1) Check wget'
@@ -72,7 +72,7 @@ def setup(arch_type,hg='all'):
 		print sys.exit(1)
 	print '\n2) Compile scikit-learn-0.17 and check joblib'
         cmd='cd '+prog_dir+'/tools/; tar -xzvf scikit-learn-0.17.tar.gz;' 
-	cmd=cmd+'cd scikit-learn-0.17; python setup.py install --install-lib='+prog_dir+'/tools;'
+	cmd=cmd+'cd scikit-learn-0.17; python setup.py install --install-lib='+prog_dir+'/tools'
 	print cmd
         out=getstatusoutput(cmd)
         print out[1]
@@ -91,16 +91,33 @@ def setup(arch_type,hg='all'):
 	if out[0]!=0 and out[0]!=65280:
 		print >> sys.stderr,'ERROR: Incorrect architecture check your system or compile it.'
 		print sys.exit(1)
+	
+	if web: sys.exit(0)
+
+	dcount=0
 	print '\n4) Download UCSC Data. It can take several minutes depending on the newtork speed.'
-	if hg=='all' or hg=='hg19':
+	if (hg=='all' or hg=='hg19'):
 		out=get_ucsc_data('hg19','hg19.2bit','bigZips')
+		if out[0]==0: dcount+=1
 		biofold='http://snps.biofold.org/PhD-SNPg/ucsc'
 		out=get_ucsc_data('hg19','hg19.phyloP46way.primate.bw','',biofold)
-		get_ucsc_data('hg19','hg19.100way.phyloP100way.bw','phyloP100way')
-	if hg=='all' or hg=='hg38':
-		get_ucsc_data('hg38','hg38.2bit','bigZips')
-		get_ucsc_data('hg38','hg38.phyloP7way.bw','phyloP7way')
-		get_ucsc_data('hg38','hg38.phyloP100way.bw','phyloP100way')
+		if out[0]==0: dcount+=1
+		out=get_ucsc_data('hg19','hg19.100way.phyloP100way.bw','phyloP100way')
+		if out[0]==0: dcount+=1
+		if dcount<3:
+			print >> sys.stderr, 'ERROR: Problem in hg19 data downloading.'
+			sys.exit(1)
+	dcount=0
+	if (hg=='all' or hg=='hg38'):
+		out=get_ucsc_data('hg38','hg38.2bit','bigZips')
+		if out[0]==0: dcount+=1
+		out=get_ucsc_data('hg38','hg38.phyloP7way.bw','phyloP7way')
+		if out[0]==0: dcount+=1
+		out=get_ucsc_data('hg38','hg38.phyloP100way.bw','phyloP100way')
+		if out[0]==0: dcount+=1
+		if dcount<3:
+			print >> sys.stderr, 'ERROR: Problem in hg38 data downloading.'
+			sys.exit(1)
 	print   '   Downloaded UCSC data'
 
 
@@ -195,18 +212,22 @@ def test():
 
 
 if __name__ == '__main__':
-	if len(sys.argv)==1:
+	if len(sys.argv)<3:
 		print 'python setup.py cmd arch_type [hg] '
-		print '- cmd: install or test'
+		print '- cmd: install, web_install or test'
 		print '- arch_type: linux.x86_64, linux.x86_64.v287, macOSX.x86_64, etc'
 		print '- hg: all, hg19, hg38'
 		sys.exit(0)
+	web=False
 	opt=sys.argv[1]
+	if opt=='web_install':
+		web=True
+		opt='install'
 	if opt=='install':
 		arch_type=sys.argv[2]
 		hg='all'
 		if len(sys.argv)>3: hg=sys.argv[3]
-		setup(arch_type,hg)
+		setup(arch_type,hg,web)
 	
 	elif opt=='test':
 		test()
