@@ -20,12 +20,13 @@ INSTALLATION
       For Linux 64bit architecture there are two compiled versions:
         - linux.x86_64
         - linux.x86_64.v287
+        - macOSX.x86_64
 
       Installation time depends on the network speed.
       About 30G UCSC files need to be downloaded.i
 
       For light installation:
-	python setup.py web_install arch_typ
+        python setup.py web_install arch_typ
 
       With the web_install option the PhD-SNPg
       runs  without downloading the UCSC data.
