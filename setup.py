@@ -150,15 +150,7 @@ def test():
 	print out[1]
 	if out[0]!=0:
 		print >> sys.stderr,'WARNING: md5sum failed on hg19'
-	#files=['hg19.2bit','hg19.100way.phyloP100way.bw','hg19.phyloP46way.primate.bw']
-	#for i in files:
-	#	cmd='ls '+ucsc_dir+'/hg19/'+i
-	#	print cmd
-	#	out=getstatusoutput(cmd)
-	#	print out[1]
-	#	if out[0]!=0:		
-	#		print >> sys.stderr,'WARNING: Not found file',i
-	#		if 'hg19' in hgs: hgs.remove('hg19')
+		print >> sys.stderr,'hg19 predictions will run only in web mode '
 	print '\n4) Check hg38 files'
 	cmd='cd '+ucsc_dir+'/hg38/; md5sum -c hg38.md5'
 	print cmd
@@ -166,15 +158,8 @@ def test():
 	print out[1]
 	if out[0]!=0:
 		print >> sys.stderr,'WARNING: md5sum failed on hg38'
-	#files=['hg38.2bit','hg38.phyloP100way.bw','hg38.phyloP7way.bw']
-	#for i in files:
-	#	cmd='ls '+ucsc_dir+'/hg38/'+i
-	#	print cmd
-	#	out=getstatusoutput(cmd)
-	#	print out[1]
-	#	if out[0]!=0:
-	#		print >> sys.stderr,'WARNING: Not found file',i
-	#		if 'hg38' in hgs: hgs.remove('hg38')
+		print >> sys.stderr,'hg38 predictions will run only in web mode '
+
 	if hgs==[]:
 		print >> sys.stderr,'ERROR: UCSC data file not correctly downloaded'
 		sys.exit()

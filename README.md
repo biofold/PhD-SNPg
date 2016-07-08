@@ -15,18 +15,25 @@ INSTALLATION
       wget, zcat, scikit-learn.
 
       Run:
-        python setup.py install arch_type
+        python setup.py install arch_typ
 
       For Linux 64bit architecture there are two compiled versions:
         - linux.x86_64
         - linux.x86_64.v287
 
       Installation time depends on the network speed.
-      About 30G UCSC files need to be downloaded.
+      About 30G UCSC files need to be downloaded.i
+
+      For light installation:
+	python setup.py web_install arch_typ
+
+      With the web_install option the PhD-SNPg
+      runs  without downloading the UCSC data.
+      The functionality of the program depends 
+      on the network speed..
 
       Test:
         python setup.py test	
-
 
 
 MANUAL INSTALLATION
