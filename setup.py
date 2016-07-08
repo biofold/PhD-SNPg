@@ -4,14 +4,6 @@ global ucsc_tool
 ucsc_tool='http://hgdownload.cse.ucsc.edu/admin/exe'
 
 
-def test():
-	prog_dir = os.path.dirname(os.path.abspath(__file__))
-	ucsc_dir = prog_dir+'/ucsc'
-	ucsc_exe = ucsc_dir+'/exe'
-	prog_cat = 'zcat'
-	print >> sys.stderr, 'W'
-
-
 def get_ucsc_tools(arch_type):
 	prog_dir = os.path.dirname(os.path.abspath(__file__))
 	ucsc_dir = prog_dir+'/ucsc'
@@ -31,16 +23,25 @@ def get_ucsc_tools(arch_type):
 	out=getstatusoutput(cmd)
 	print out[1]
 	print >> sys.stderr,'   Test tools'
-	cmd=ucsc_dir+'/exe/twoBitToFa; '+ucsc_dir+'/exe/bigWigToBedGraph'
+	cmd=ucsc_dir+'/exe/twoBitToFa'
 	print cmd
 	out=getstatusoutput(cmd)
 	print out[1]
 	if out[0]!=0 and out[0]!=65280:
 		print >> sys.stderr,'  ERROR: Incorrect architecture',arch_type
-		cmd='rm '+ucsc_dir+'/exe/*'
+		cmd='rm '+ucsc_dir+'/exe/twoBitToFa'
 		getstatusoutput(cmd)
-	else:
-		print >> sys.stderr,'   Downloaded UCSC Tools'
+		return out
+	cmd=ucsc_dir+'/exe/bigWigToBedGraph'
+	print cmd
+	out=getstatusoutput(cmd)
+	print out[1]
+	if out[0]!=0 and out[0]!=65280:
+		print >> sys.stderr,'  ERROR: Incorrect architecture',arch_type
+		cmd='rm '+ucsc_dir+'/exe/bigWigToBedGraph'
+		getstatusoutput(cmd)
+		return out
+	print >> sys.stderr,'   Downloaded UCSC Tools'
 	return out
 	
 
@@ -106,7 +107,7 @@ def setup(arch_type,hg='all',web=False):
 		out=get_ucsc_data('hg19','hg19.100way.phyloP100way.bw','phyloP100way')
 		if out[0]==0: dcount+=1
 		if dcount<3:
-			print >> sys.stderr, 'ERROR: Problem in hg19 data downloading.'
+			print >> sys.stderr, 'ERROR: Problem in downloading hg19 data.'
 			sys.exit(1)
 	dcount=0
 	if (hg=='all' or hg=='hg38'):
@@ -117,7 +118,7 @@ def setup(arch_type,hg='all',web=False):
 		out=get_ucsc_data('hg38','hg38.phyloP100way.bw','phyloP100way')
 		if out[0]==0: dcount+=1
 		if dcount<3:
-			print >> sys.stderr, 'ERROR: Problem in hg38 data downloading.'
+			print >> sys.stderr, 'ERROR: Problem in downloading hg38 data'
 			sys.exit(1)
 	print   '   Downloaded UCSC data'
 
