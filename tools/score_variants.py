@@ -491,4 +491,6 @@ if __name__ == '__main__':
 		else:
 			if len(wt)==1 and len(nw)==1: pklcod=''	
 			make_prediction(ochr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
+	else:
+		print "python score_variants.py chromosome position ref_nuc alt_nuc -g hg_version"
 				

@@ -556,4 +556,4 @@ if __name__ == '__main__':
 			else:
 				make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
 	else:
-		print 'predict_variants.py variant_file'
+		print 'predict_variants.py variant_file -g hg_version'
