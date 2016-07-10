@@ -148,6 +148,29 @@ def get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,web=False,win=2,dbname='hg38.ph
 	return cons
 
 
+def get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web=False,win=2,dbname='hg38.phyloP100way.bw',prog='bigWigToBedGraph'):
+	s=max(0,ipos-win-1)
+	e=ipos+win
+	v=["NA" for i in range(2*win+1)]
+	db_file=ucsc_dbs+'/'+dbname
+	if web: db_file=ucsc_web[dbname]+'/'+dbname
+	cmd=ucsc_exe+'/'+prog+' '+db_file+' stdout -chrom='+ichr+' -start='+str(s)+' -end='+str(e)
+	if verbose: print >> sys.stderr, cmd
+	out=getstatusoutput(cmd)
+	if out[0]!=0:
+		print >> sys.stderr,'ERROR: Conservation fetch -', out[1]
+		sys.exit(1)
+	else:
+		for line in out[1].split('\n'):
+			vd=line.split()
+			r1=int(vd[1])
+			r2=int(vd[2])	
+			for i in range(r1,r2):
+				v[i-s]=float(vd[-1])
+	cons=check_conservation(v,win)
+        return cons
+
+
 def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	# for 0 starting genome
 	nuc=''
@@ -160,8 +183,8 @@ def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='
 	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbfasta,fprog)
 	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input1,cons_input2
         seq_input=get_seqinput(seq,wt,nw,win)
-        cons_input1=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpps[0],cprog)
-        cons_input2=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpps[1],cprog)
+        cons_input1=get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpps[0],cprog)
+        cons_input2=get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpps[1],cprog)
 	return nuc,seq,seq_input,cons_input1,cons_input2
 
 
@@ -177,7 +200,7 @@ def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg3
 	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input
 	seq_input=get_seqinput(seq,wt,nw,win)
 	for dbpp in dbpps:
-		cons=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpp,cprog)
+		cons=get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpp,cprog)
 		cons_input.append(cons)
 	return nuc,seq,seq_input,cons_input
 
@@ -195,7 +218,7 @@ def get_indel_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='h
 	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input,r_cod	
 	seq_input=get_seqinput(seq,wt,nw,win)
 	for dbpp in dbpps:
-		cons=get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpp,cprog)
+		cons=get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpp,cprog)
 		cons_input.append(cons)
         if pklcod!='': r_cod=get_coding_range(ichr,ipos,ucsc_exe,ucsc_dbs,pklcod)
 	return nuc,seq,seq_input,cons_input,r_cod
