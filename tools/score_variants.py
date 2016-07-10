@@ -149,8 +149,8 @@ def get_conservation(ichr,ipos,ucsc_exe,ucsc_dbs,web=False,win=2,dbname='hg38.ph
 
 
 def get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web=False,win=2,dbname='hg38.phyloP100way.bw',prog='bigWigToBedGraph'):
-	s=max(0,ipos-win-1)
-	e=ipos+win
+	s=max(0,ipos-win)
+	e=ipos+win+1
 	v=["NA" for i in range(2*win+1)]
 	db_file=ucsc_dbs+'/'+dbname
 	if web: db_file=ucsc_web[dbname]+'/'+dbname
@@ -184,7 +184,7 @@ def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='
 	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input1,cons_input2
         seq_input=get_seqinput(seq,wt,nw,win)
         cons_input1=get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpps[0],cprog)
-        cons_input2=get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,win,dbpps[1],cprog)
+        cons_input2=get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpps[1],cprog)
 	return nuc,seq,seq_input,cons_input1,cons_input2
 
 
