@@ -163,6 +163,7 @@ def get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web=False,win=2,dbname='hg38.p
 	else:
 		for line in out[1].split('\n'):
 			vd=line.split()
+			if len(vd)<3: continue
 			r1=int(vd[1])
 			r2=int(vd[2])	
 			for i in range(r1,r2):
@@ -330,7 +331,7 @@ def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg
 		if seq=='': 
 			print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos
 		if seq_input==[]:
-			print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+			print >> sys.stderr, 'WARNING: Incorrect nucleotide in line '+str(c)+'. Genome location:',ichr,pos
 		if cons_input1==[] or cons_input2==[]:
 			print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
 		p_cod=0
@@ -377,7 +378,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='
 		else: 
 			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		if seq=='': print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos		
-		if seq_input==[]: print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+		if seq_input==[]: print >> sys.stderr, 'WARNING: Incorrect nucleotide in line '+str(c)+'. Genome location:',ichr,pos
 		if cons_input!=[]:
 			cons_input1=cons_input[0]
 			cons_input2=cons_input[1]

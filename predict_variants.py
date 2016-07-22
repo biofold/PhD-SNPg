@@ -152,7 +152,7 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if seq_input==[]: 
-			print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+			print >> sys.stderr, 'WARNING: Incorrect nucleotide in line '+str(c)+'. Genome location:',ichr,pos
 			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if cons_input!=[]:
@@ -231,7 +231,7 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 			sys.exit(1)
 		for inw in list_nw:
 			if wt==inw:
-				print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+				print >> sys.stderr, 'WARNING: Incorrect nucleotide in line '+str(c)+'. Genome location:',ichr,pos
 				print line+'\tNA\tNA\tNA\tNA\tNA'
 				continue
 			lwt=len(wt)
@@ -257,7 +257,7 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 				list_pred.append(6*['NA'])
 				continue
 			if seq_input==[]: 
-				print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+				print >> sys.stderr, 'WARNING: Incorrect nucleotide in line '+str(c)+'. Genome location:',ichr,pos
 				list_pred.append(6*['NA'])
 				continue
 			if cons_input!=[]:
@@ -358,7 +358,7 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 			#print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if seq_input==[]: 
-			print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+			print >> sys.stderr, 'WARNING: Incorrect nucleotide in line '+str(c)+'. Genome location:',ichr,pos
 			#print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if cons_input!=[]:
@@ -442,7 +442,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='
 		else: 
 			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		if seq=='': print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos		
-		if seq_input==[]: print >> sys.stderr, 'WARNING: Incorrect nucleotide in line',c,ichr,pos
+		if seq_input==[]: print >> sys.stderr, 'WARNING: Incorrect nucleotide in line '+str(c)+'. Genome location:',ichr,pos
 		if cons_input!=[]:
 			cons_input1=cons_input[0]
 			cons_input2=cons_input[1]
