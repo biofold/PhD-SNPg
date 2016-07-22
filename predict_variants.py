@@ -66,7 +66,11 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 	else:
 		print >> sys.stderr, 'ERROR: Incorrect conservation data in position',ichr,ipos
 		sys.exit(1)
-	model=joblib.load(modfile)
+	try:
+		model=joblib.load(modfile)
+	except:
+		print >> sys.stderr,'ERROR: Program not able to load modfile. Please check that you have installed a compatible version joblib.'
+		sys.exit(1)
 	if pklcod=='':
 		X=[seq_input + cons_input1+ cons_input2 ]
 		y_pred,y_fdrs,c_pred=prediction(X,model)
@@ -91,8 +95,12 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 
 
 def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
-	model1=joblib.load(modfile[0])
-	model2=joblib.load(modfile[1])	
+	try:
+		model1=joblib.load(modfile[0])
+		model2=joblib.load(modfile[1])	
+	except:
+		print >> sys.stderr,'ERROR: Program not able to load modfile. Please check that you have installed a compatible version joblib.'
+		sys.exit(1)
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()        
 	c=1
@@ -187,8 +195,12 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 
 
 def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
-	model1=joblib.load(modfile[0])
-	model2=joblib.load(modfile[1])
+	try:
+		model1=joblib.load(modfile[0])
+		model2=joblib.load(modfile[1])
+	except:
+		print >> sys.stderr,'ERROR: Program not able to load modfile. Please check that you have installed a compatible version joblib.'
+		sys.exit(1)
 	list_pred=[]	
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()        
@@ -294,8 +306,12 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 
 
 def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
-	model1=joblib.load(modfile[0])
-	model2=joblib.load(modfile[1])	
+	try:
+		model1=joblib.load(modfile[0])
+		model2=joblib.load(modfile[1])	
+	except:
+		print >> sys.stderr,'ERROR: Program not able to load modfile. Please check that you have installed a compatible version joblib.'
+		sys.exit(1)
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()        
 	c=1
@@ -386,8 +402,12 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 
 
 def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
-	model1=joblib.load(modfile[0])
-	model2=joblib.load(modfile[1])
+	try:
+		model1=joblib.load(modfile[0])
+		model2=joblib.load(modfile[1])
+	except:
+		print >> sys.stderr,'ERROR: Program not able to load modfile. Please check that you have installed a compatible version joblib.'
+		sys.exit(1)
 	f=open(namefile)
 	c=1
 	print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100"
