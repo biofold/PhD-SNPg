@@ -31,7 +31,7 @@ INSTALLATION
       With the web_install option the PhD-SNPg
       runs without downloading the UCSC data.
       The functionality of the program depends 
-      on the network speed..
+      on the network speed.
 
       Test:
         python setup.py test	
