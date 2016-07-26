@@ -23,7 +23,7 @@ INSTALLATION
         - macOSX.x86_64
 
       Installation time depends on the network speed.
-      About 30G UCSC files need to be downloaded.i
+      About 30G UCSC files need to be downloaded.
 
       For light installation:
         python setup.py web_install arch_typ
