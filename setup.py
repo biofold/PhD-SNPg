@@ -195,7 +195,7 @@ def test(hg='all',web=False):
 				print >> sys.stderr,'WARNING: md5sum failed on hg19'
 				print >> sys.stderr,'hg19 predictions will run only in web mode '
 		
-		if hg=='all' or hg=='hg19':
+		if hg=='all' or hg=='hg38':
 			print '\n4) Check local hg38 files. Please wait, md5sum can take few minutes.'
 			cmd='cd '+ucsc_dir+'/hg38/; md5sum -c hg38.md5'
 			print cmd
