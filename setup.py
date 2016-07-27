@@ -1,7 +1,9 @@
-import os, sys
+import os, sys 
 from commands import getstatusoutput
-global ucsc_tool
+global ucsc_tool, ucsc_path, biofold_path
 ucsc_tool='http://hgdownload.cse.ucsc.edu/admin/exe'
+ucsc_path='http://hgdownload.cse.ucsc.edu/goldenPath'
+biofold_path='http://snps.biofold.org/PhD-SNPg/ucsc'
 
 
 def get_ucsc_tools(arch_type):
@@ -123,8 +125,13 @@ def setup(arch_type,hg='all',web=False):
 	print   '   Downloaded UCSC data'
 
 
-def test():
-	hgs=['hg19','hg38']
+def test(hg='all',web=False):
+	if hg=='hg19':
+		hgs=['hg19']
+	elif hg=='hg38':
+		hgs=['hg38']
+	else:
+		hgs=['hg19','hg38']
 	prog_dir = os.path.dirname(os.path.abspath(__file__))
         ucsc_dir = prog_dir+'/ucsc'
 	test_dir = prog_dir+'/test'
@@ -137,6 +144,7 @@ def test():
 	if out[0]!=0:
 		print >> sys.stderr,'ERROR: scikit-learn not installed'
 		sys.exit(1)
+
 	print '\n2) Test zcat command'
 	cmd='zcat -f '+test_dir+'/test_variants_hg19.vcf.gz '
 	print cmd
@@ -145,91 +153,157 @@ def test():
 	if out[0]!=0:
 		print >> sys.stderr,'ERROR: Command zcat not available'
 		sys.exit(1)
-	print '\n3) Check hg19 files'
-        cmd='cd '+ucsc_dir+'/hg19/; md5sum -c hg19.md5'
-	print cmd
-	out=getstatusoutput(cmd)
-	print out[1]
-	if out[0]!=0:
-		print >> sys.stderr,'WARNING: md5sum failed on hg19'
-		print >> sys.stderr,'hg19 predictions will run only in web mode '
-	print '\n4) Check hg38 files'
-	cmd='cd '+ucsc_dir+'/hg38/; md5sum -c hg38.md5'
-	print cmd
-	out=getstatusoutput(cmd)
-	print out[1]
-	if out[0]!=0:
-		print >> sys.stderr,'WARNING: md5sum failed on hg38'
-		print >> sys.stderr,'hg38 predictions will run only in web mode '
 
-	if hgs==[]:
-		print >> sys.stderr,'ERROR: UCSC data file not correctly downloaded'
-		sys.exit()
-	print '\n5) Test twoBitToFa command'
-	twobit=ucsc_dir+'/'+hgs[0]+'/'+hgs[0]+'.2bit'
-	cmd=ucsc_tool+'/twoBitToFa '+twobit+' stdout -seq=chr1 -start=10008 -end=10010'
-	print cmd
-	out=getstatusoutput(cmd)
-	print out[1]
-	if out[0]!=0:
-		print >> sys.stderr,'ERROR: twoBitToFa not working'
-		sys.exit(1)
-	print '\n6) Test bigWigToBedGraph command'
-	if hgs[-1]=='hg19':
-		bwg=ucsc_dir+'/'+hgs[-1]+'/'+hgs[-1]+'.100way.phyloP100way.bw'
+	if web:	
+		if hg=='all' or hg=='hg19':
+			ihg='hg19'
+			print '\n3) Check web hg19 files'
+			hg19s=[ucsc_path+'/'+ihg+'/bigZips/'+ihg+'.2bit', \
+				biofold_path+'/'+ihg+'/'+ihg+'.phyloP46way.primate.bw',\
+				ucsc_path+'/'+ihg+'/phyloP100way/'+ihg+'.100way.phyloP100way.bw']
+			for hgfile in hg19s:
+				cmd='curl --head -s '+hgfile
+				out=getstatusoutput(cmd)
+				if out[1].find('HTTP/1.1 200 OK')==-1:
+					print >> sys.stderr,'ERROR: Data file',hgfile,'not available.'
+					sys.exit(1)	
+				else:
+					print 'File',hgfile,'available.'
+
+		if hg=='all' or hg=='hg38':
+			ihg='hg38'
+			print '\n4) Check web hg38 files'	
+			hg38s=[ ucsc_path+'/'+ihg+'/bigZips/'+ihg+'.2bit', \
+				ucsc_path+'/'+ihg+'/phyloP7way/'+ihg+'.phyloP7way.bw',\
+				ucsc_path+'/'+ihg+'/phyloP100way/'+ihg+'.phyloP100way.bw']
+			for hgfile in hg38s:
+				cmd='curl --head -s '+hgfile
+				out=getstatusoutput(cmd)			
+				if out[1].find('HTTP/1.1 200 OK')==-1:
+					print >> sys.stderr,'ERROR: Data file',hgfile,'not available.'
+					sys.exit(1)
+				else:
+					print 'File',hgfile,'available.'
 	else:
-		bwg=ucsc_dir+'/'+hgs[-1]+'/'+hgs[-1]+'.phyloP100way.bw'
-	cmd=ucsc_tool+'/bigWigToBedGraph '+bwg+' stdout -chrom=chr1 -start=100008 -end=100012'
-	print cmd
-	out=getstatusoutput(cmd)
-	print out[1]
-	if out[0]!=0:
-		print >> sys.stderr,'ERROR: bigWigToBedGraph not working'
-		sys.exit(1)
+		if hg=='all' or hg=='hg19':
+			print '\n3) Check local hg19 files. Please wait, md5sum can take few minutes.'
+        		cmd='cd '+ucsc_dir+'/hg19/; md5sum -c hg19.md5'
+			print cmd
+			out=getstatusoutput(cmd)
+			print out[1]
+			if out[0]!=0:
+				print >> sys.stderr,'WARNING: md5sum failed on hg19'
+				print >> sys.stderr,'hg19 predictions will run only in web mode '
+		
+		if hg=='all' or hg=='hg19':
+			print '\n4) Check local hg38 files. Please wait, md5sum can take few minutes.'
+			cmd='cd '+ucsc_dir+'/hg38/; md5sum -c hg38.md5'
+			print cmd
+			out=getstatusoutput(cmd)
+			print out[1]
+			if out[0]!=0:
+				print >> sys.stderr,'WARNING: md5sum failed on hg38'
+				print >> sys.stderr,'hg38 predictions will run only in web mode '
+
+	#if hgs==[]:
+	#	print >> sys.stderr,'ERROR: UCSC data file not correctly downloaded'
+	#	sys.exit()
+
+	print '\n5) Test twoBitToFa command'
+	for ihg in hgs:	
+		if web:
+			twobit=ucsc_path+'/'+ihg+'/bigZips/'+ihg+'.2bit'
+		else:
+			twobit=ucsc_dir+'/'+ihg+'/'+ihg+'.2bit'
+		cmd=ucsc_tool+'/twoBitToFa '+twobit+' stdout -seq=chr1 -start=10008 -end=10010'
+		print cmd
+		out=getstatusoutput(cmd)
+		print out[1]
+		if out[0]!=0:
+			print >> sys.stderr,'ERROR: twoBitToFa not working with',ihs
+			sys.exit(1)
+
+	print '\n6) Test bigWigToBedGraph command'
+	for ihg in hgs:
+		if web:
+			if ihg=='hg19':
+				bwg=biofold_path+'/'+ihg+'/'+ihg+'.phyloP46way.primate.bw'
+			else:
+				bwg=ucsc_path+'/'+ihg+'/phyloP100way/'+ihg+'.phyloP100way.bw'
+		else:
+			if ihg=='hg19':
+				bwg=ucsc_dir+'/'+ihg+'/'+ihg+'.100way.phyloP100way.bw'
+			else:
+				bwg=ucsc_dir+'/'+ihg+'/'+ihg+'.phyloP100way.bw'
+		cmd=ucsc_tool+'/bigWigToBedGraph '+bwg+' stdout -chrom=chr1 -start=100008 -end=100012'
+		print cmd
+		out=getstatusoutput(cmd)
+		print out[1]
+		if out[0]!=0:
+			print >> sys.stderr,'ERROR: bigWigToBedGraph not working with',ihg
+			sys.exit(1)
+
 	print '\n7) Test predict_variants.py'
-	cmd='python predict_variants.py test/test_variants_'+hgs[0]+'.tsv -g '+hgs[0]
-	print cmd
-	out=getstatusoutput(cmd+' |head -n 5')
-	print out[1]
-	if out[0]!=0:
-		print >> sys.stderr,'ERROR: predict_variants.py not working'
-		sys.exit(1)
+	for ihg in hgs:
+		if web:
+			cmd='python predict_variants.py test/test_short_variants_'+ihg+'.tsv -g '+ihg+' --web '
+		else:
+			cmd='python predict_variants.py test/test_short_variants_'+ihg+'.tsv -g '+ihg
+		print cmd
+		out=getstatusoutput(cmd)
+		print out[1]
+		if out[0]!=0:
+			print >> sys.stderr,'ERROR: predict_variants.py not working with',ihg
+			sys.exit(1)
 	return
 
 
 
-if __name__ == '__main__':
-	if len(sys.argv)<3:
-		print 'python setup.py cmd arch_type [hg] '
-		print '- cmd: install, web_install or test'
-		print '- arch_type: linux.x86_64, linux.x86_64.v287, macOSX.x86_64, etc'
-		print '- hg: all, hg19, hg38'
-		sys.exit(0)
+def get_options():
+	import optparse
+        desc = 'Script for installing and testing PhD-SNPg.'
+        parser = optparse.OptionParser("usage: %prog cmd arch_type [-g hg] [--web]", description=desc)
+        parser.add_option('-g','--genome', action='store', type='string', dest='hg', default='all', help='Genome version')
+	parser.add_option('--web', action='store_true', dest='web', default=False, help='Use UCSC web files')
+	(options, args) = parser.parse_args()
+	hg='all'
 	web=False
-	opt=sys.argv[1]
-	if opt=='web_install':
-		web=True
-		opt='install'
-	if opt=='install':
-		arch_type=sys.argv[2]
+	if options.hg: hg=options.hg.lower()
+	if hg!='hg19' and hg!='hg38': hg='all'
+	if options.web: web=True
+	if len(args)<1:
+		print 'python setup.py cmd arch_type [-g hg] [--web]'
+		print '  cmd: install or test'
+		print '  arch_type: linux.x86_64, linux.x86_64.v287, macOSX.x86_64, etc'
+		print '  -g = hg: all, hg19, hg38'
+		print '  -web = not download file'
+		sys.exit(0)
+	return args,hg,web
+
+
+
+if __name__ == '__main__':
+	args,hg,web=get_options()
+	opt=args[0]
+	if opt=='install' and len(args)>1:
+		arch_type=args[2]
 		arch_list=['linux.x86_64.v287','linux.x86_64',\
 			'macOSX.x86_64','macOSX.i386','macOSX.ppc']
 		if arch_type not in arch_list:
 			print >> sys.stderr,'ERROR: Incorrect architecture type.'
 			print >> sys.stderr,'Available UCSC precomplied tools are only for '+', '.join(arch_list)
 			sys.exit(1)
-		hg='all'
-		if len(sys.argv)>3: hg=sys.argv[3]
 		setup(arch_type,hg,web)
 	
 	elif opt=='test':
-		test()
-
+		test(hg,web)
+		
 	else:
-		print 'python setup.py cmd arch_type [hg] '
-		print '- cmd: install or test'
-		print '- arch_type: linux.x86_64, linux.x86_64.v287, macOSX.x86_64, etc'
-		print '- hg: all, hg19, hg38' 
+		print 'python setup.py cmd arch_type [-g hg] [--web]'
+		print '  cmd: install or test'
+		print '  arch_type: linux.x86_64, linux.x86_64.v287, macOSX.x86_64, etc'
+		print '  -g = hg: all, hg19, hg38' 
+		print '  -web = not download file'
 
 
 
