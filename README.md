@@ -26,7 +26,7 @@ INSTALLATION
       About 30G UCSC files need to be downloaded.
 
       For light installation:
-        python setup.py web_install arch_typ
+        python setup.py install arch_typ --web
 
       With the web_install option the PhD-SNPg
       runs without downloading the UCSC data.
@@ -34,7 +34,10 @@ INSTALLATION
       on the network speed.
 
       Test:
-        python setup.py test	
+        python setup.py test
+      
+      For web installation:
+	python setup.py test --web
 
 
 MANUAL INSTALLATION
