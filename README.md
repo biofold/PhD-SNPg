@@ -35,9 +35,9 @@ INSTALLATION
 
       Test:
         python setup.py test
-      
+
       For web installation:
-	python setup.py test --web
+        python setup.py test --web
 
 
 MANUAL INSTALLATION
