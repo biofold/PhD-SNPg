@@ -83,7 +83,7 @@ def setup(arch_type,hg='all',web=False):
         if out[0]!=0:
                 print >> sys.stderr, "ERROR: scikit-learn istallation failed."
                 sys.exit(1)	
-        cmd='python -c \'from sklearn.externals import joblib\''
+        cmd='cd '+prog_dir+'/tools/; python -c \'from sklearn.externals import joblib\''
 	print 'CMD:',cmd
 	out=getstatusoutput(cmd)
 	print out[1]
@@ -265,7 +265,7 @@ if __name__ == '__main__':
 	args,hg,web=get_options()
 	opt=args[0]
 	if opt=='install' and len(args)>1:
-		arch_type=args[2]
+		arch_type=args[1]
 		arch_list=['linux.x86_64.v287','linux.x86_64',\
 			'macOSX.x86_64','macOSX.i386','macOSX.ppc']
 		if arch_type not in arch_list:
