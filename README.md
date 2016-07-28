@@ -12,7 +12,7 @@ INTRODUCTION
 INSTALLATION
 
       Minimum requirements:
-      wget, zcat, scikit-learn.
+      wget, curl, zcat, scikit-learn.
 
       Run:
         python setup.py install arch_typ
@@ -45,13 +45,14 @@ MANUAL INSTALLATION
       1) Download PhD-SNPg script from github
         - git clone https://github.com/biofold/PhD-SNPg.git
 
-      2) Required python libraries: scikit-learn-0.17
-	  They are already available in tools directory.
-
-	- Untar the scikit-learn-0.17.tar.gz directory and run
-          python setup.py install --install-lib=../
+      2) Required python library: scikit-learn-0.17
+	  It is available in tools directory or at
 	  https://pypi.python.org/simple/scikit-learn/
 
+	- Untar the scikit-learn-0.17.tar.gz 
+          move in the directory and run
+          python setup.py install --install-lib=..
+          
       3) Required UCSC tools and data:
         - bigWigToBedGraph and twoBitToFa from
           http://hgdownload.cse.ucsc.edu/admin/exe
