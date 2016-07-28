@@ -76,6 +76,7 @@ MANUAL INSTALLATION
 HOW TO RUN
 		
       PhD-SNPg can take in input a single variation or a file containing multiple single nucleotide variants.
+      For web installation append --web at the of all commands.
 
       - For single variants use the option -c:
         python predict_variants.py chr7,158715219,A,G -g hg19 -c
