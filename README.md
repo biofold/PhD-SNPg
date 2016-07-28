@@ -46,8 +46,8 @@ MANUAL INSTALLATION
         - git clone https://github.com/biofold/PhD-SNPg.git
 
       2) Required python library: scikit-learn-0.17
-	  It is available in tools directory or at
-	  https://pypi.python.org/simple/scikit-learn/
+          It is available in tools directory or at
+          https://pypi.python.org/simple/scikit-learn/
 
 	- Untar the scikit-learn-0.17.tar.gz 
           move in the directory and run
