@@ -136,13 +136,25 @@ def test(hg='all',web=False):
         ucsc_dir = prog_dir+'/ucsc'
 	test_dir = prog_dir+'/test'
 	ucsc_tool =  ucsc_dir+'/exe'
-	print '1) Test python libray scikit-learn'
-	cmd='cd '+prog_dir+'/tools; python -c \'import joblib; print joblib.__doc__\''
+	print '1) Test python libray scikit-learn and load prediction models'
+	cmd='cd '+prog_dir+'/tools; python -c \'from sklearn.externals import joblib\''
 	print cmd
-	out=getstatusoutput(cmd+' |head -n 9')
-	print out[1]
-	if out[0]!=0:
+	out=getstatusoutput(cmd)
+	if out[0]==0:
+		print 'Loaded joblib library from sklearn.externals.'
+	else:
 		print >> sys.stderr,'ERROR: scikit-learn not installed'
+		sys.exit(1)
+	
+	models=[prog_dir+'/data/model/snv_model_w5_p7_500.pkl',prog_dir+'/data/model/indel_model_w5_p7_500.pkl']
+	try:
+		from sklearn.externals import joblib
+		print ''
+		for model in models:
+			omodel=joblib.load(model)
+			print >> sys.stderr,'Loaded model',model
+	except:
+		print >> sys.stderr,'ERROR: Not able to load prediction models'
 		sys.exit(1)
 
 	print '\n2) Test zcat command'
