@@ -53,6 +53,10 @@ def parse_variants(ichr,pos,wt,nw,ucsc_exe,ucsc_dbs,web=False,dbfasta='hg38.2bit
 	lnw=len(nw_seq)
 	#print wt,nw,pos,wt_seq,nw_seq
 	n=min(lnw,lwt)
+	v_nuc=['ACGTN'.find(i) for i in nw_seq]
+	if -1 in v_nuc:
+		print >> sys.stderr,'ERROR: Sequence fetch -', out[1]
+		return n_wt,n_nw,n_pos
 	for i in range(n):
 		#print n_pos,wt_seq[i],nw_seq[i]
 		if wt_seq[i]!=nw_seq[i]:
