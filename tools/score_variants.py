@@ -193,21 +193,23 @@ def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='
 	return nuc,seq,seq_input,cons_input1,cons_input2
 
 
-def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	# for 0 starting genome
 	nuc=''
 	seq=''
 	seq_input=[]
 	cons_input=[]
+	r_cod=[]
 	#Set genome starting position to 0
 	ipos=ipos-1
 	nuc,seq=get_sequence(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbfasta,fprog)
-	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input
+	if nuc=='' or seq=='': return nuc,seq,seq_input,cons_input,r_cod
 	seq_input=get_seqinput(seq,wt,nw,win)
 	for dbpp in dbpps:
 		cons=get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpp,cprog)
 		cons_input.append(cons)
-	return nuc,seq,seq_input,cons_input
+	if pklcod!='': r_cod=get_coding_range(ichr,ipos,ucsc_exe,ucsc_dbs,pklcod)
+	return nuc,seq,seq_input,cons_input,r_cod
 
 
 def get_indel_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
@@ -260,8 +262,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 		print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw
 		sys.exit()
 	if pklcod=='':
-		r_cod=[]
-		(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,fprog,cprog)
+		(nuc,seq,seq_input,cons_input,r_cod)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 	else:
 		(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 	if seq=='': 
@@ -284,26 +285,29 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 	except:
 		print >> sys.stderr,'ERROR: Program not able to load modfile. Please check that you have installed a compatible version joblib.'
 		sys.exit(1)
+	p_cod=0
+	cod='No'
+	if p_cod!=[]:
+		p_cod=1
+		cod='Yes'
 	if pklcod=='':
 		X=[seq_input + cons_input1+ cons_input2 ]
 		y_pred,y_fdrs,c_pred=prediction(X,model)
 		v_fdr=[y_fdrs[0][0],y_fdrs[0][1]]
 	else:
-		p_cod=0
-		if r_cod!=[]: p_cod=1
 		X=[seq_input + cons_input1+ cons_input2 + [lwt, lnw, p_cod]]
 		y_pred,y_fdrs,c_pred=prediction(X,model)
 		v_fdr=[y_fdrs[0][2],y_fdrs[0][3]]
 	if y_pred==[]:
 		print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
-		print '\t'.join([str(i) for i in [ichr,ipos,wt+','+nw] ])+'\tNA\tNA\tNA\tNA\tNA'
+		print '\t'.join([str(i) for i in [ichr,ipos,wt,nw] ])+'\tNA\tNA\tNA\tNA\tNA\tNA'
 	else:
-		print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100"
+		print "#CHROM\tPOS\tREF\tALT\tCODING\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100"
 		pp100=cons_input2[win]
 		avgpp100=sum(cons_input2)/float(len(cons_input2))
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,'%.3f' %pp100,'%.3f' %avgpp100])
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,cod,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,'%.3f' %pp100,'%.3f' %avgpp100])
 	return
 
 
@@ -354,7 +358,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='
 		sys.exit(1)
 	f=open(namefile)
 	c=1
-	print "#CHROM\tPOS\tREF\tALT\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100"
+	print "#CHROM\tPOS\tREF\tALT\tCODING\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100"
 	for line in f:	
 		v=line.rstrip().split(s)
 		if len(v)<4: print >> sys.stderr,'WARNING: Incorrect line ',c,line.rstrip()
@@ -374,11 +378,11 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='
 		if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
 			print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw		
 		if wt==nw or nw.find(',')>-1:
-			print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'NA','NA','NA','NA','NA'])
+			print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'NA','NA','NA','NA','NA','NA'])
 			continue
 		if len(wt)==1 and len(nw)==1:
 			r_cod=[]
-			(nuc,seq,seq_input,cons_input)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,fprog,cprog)
+			(nuc,seq,seq_input,cons_input,r_cod)=get_snv_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		else: 
 			(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		if seq=='': print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos		
@@ -388,28 +392,31 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='
 			cons_input2=cons_input[1]
 		else:
 			print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
-			print line+'\tNA\tNA\tNA\tNA\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		if cons_input1==[] or cons_input2==[]: print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
+		p_cod=0
+		cod='No'
+		if r_cod!=[]:
+			p_cod=1
+			cod='Yes'
 		if len(wt)==1 and len(nw)==1:
 			X=[seq_input + cons_input1+ cons_input2 ]
 			y_pred,y_fdrs,c_pred=prediction(X,model1)
 			v_fdr=[y_fdrs[0][0],y_fdrs[0][1]]
 		else:
-			p_cod=0
-			if r_cod!=[]: p_cod=1
 			X=[seq_input + cons_input1+ cons_input2 + [lwt, lnw, p_cod]]
 			y_pred,y_fdrs,c_pred=prediction(X,model2)
 			v_fdr=[y_fdrs[0][2],y_fdrs[0][3]]
 		if y_pred==[]:
 			print >> sys.stderr,'WARNING: Variants not scored. Check modfile and input'
-			print line+'\tNA\tNA\tNA\tNA\tNA'
+			print line+'\tNA\tNA\tNA\tNA\tNA\tNA'
 			continue
 		pp100=cons_input2[win]
 		avgpp100=sum(cons_input2)/float(len(cons_input2))
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
-		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,pp100,avgpp100])	
+		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,cod,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,pp100,avgpp100])	
 	return 
 
 
@@ -525,7 +532,6 @@ if __name__ == '__main__':
 			else:
 				print >> sys.stderr, 'ERROR: Variants',ichr,ipos,wt+','+nw
 		else:
-			if len(wt)==1 and len(nw)==1: pklcod=''	
 			make_prediction(ochr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
 	else:
 		print "python score_variants.py chromosome position ref_nuc alt_nuc -g hg_version"
