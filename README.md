@@ -102,11 +102,11 @@ OUTPUT
 
         The scores added as extra columns to the input file. An example of output is reported below.
 
-        #CHROM  POS     REF     ALT     CODING	PREDICTION      SCORE   FDR   PhyloP100       AvgPhyloP100
-        1       10042376        C       G       Yes	Benign  0.160   0.071   -0.159  4.509
-        1       197094291       C       T       Yes	Pathogenic      0.990   0.486   7.304   3.451
-        2       31751295        G       A       Yes	Pathogenic      0.901   0.322   1.810   3.205
-        2       71797809        C       T       Yes	Pathogenic      0.918   0.342   1.181   3.131
-        2       179577870       T       C       Yes	Benign  0.028   0.023   -6.363  2.406
-        5       74046464        C       T       Yes	Benign  0.040   0.029   -0.070  4.422
+        #CHROM  POS     REF     ALT     CODING  PREDICTION      SCORE   FDR   PhyloP100       AvgPhyloP100
+        1       45331676        G       A       Yes     Pathogenic      0.990   0.022   7.723   3.313
+        1       237634938       G       T       Yes     Benign  0.005   0.011   -4.248  5.939
+        2       26461838        G       A       Yes     Benign  0.011   0.022   -0.064  6.116
+        2       166009835       A       G       Yes     Benign  0.176   0.072   0.591   4.188
+        2       174753570       G       C       Yes     Pathogenic      0.777   0.087   -1.937  5.439
+        5       44305045        G       A       Yes     Pathogenic      0.985   0.026   1.655   3.964
 

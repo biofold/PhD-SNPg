@@ -104,7 +104,8 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 	return
 
 
-def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph',inputfile='prova_inputfile'):
+	v_input=[]
 	try:
 		model1=joblib.load(modfile[0])
 		model2=joblib.load(modfile[1])	
@@ -211,7 +212,9 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
 		print line+'\t'+'%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f' %(cod,c_pred[0],y_pred[0],d_fdr,pp100,avgpp100)
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
+		v_input.append(line+'\t'+'\t'.join([str(i) for i in X[0]])+'\n')
 		c=c+1
+	if inputfile!='': open(inputfile,'w').writelines(v_input)
 	return 
 
 
@@ -255,9 +258,9 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 			print >> sys.stderr, 'ERROR:', line
 			continue
 		##Option for selecting snv
-		if len(wt)!=1 or len(nw)!=1 or nucs.find(wt)==-1 or nucs.find(nw)==-1 or wt==nw:
-			print >> sys.stderr, 'ERROR: Not single nucloetide variant',','.join([nchr,pos,wt,nw])
-			continue
+		#if len(wt)!=1 or len(nw)!=1 or nucs.find(wt)==-1 or nucs.find(nw)==-1 or wt==nw:
+		#	print >> sys.stderr, 'ERROR: Not single nucloetide variant',','.join([nchr,pos,wt,nw])
+		#	continue
 		for inw in list_nw:
 			if wt==inw:
 				print >> sys.stderr, 'ERROR: Incorrect nucleotide in line '+str(c)+'. Genome location:',ichr,pos
@@ -385,9 +388,9 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 		lwt=len(wt)
 		lnw=len(nw)
 		##Option for selecting snv
-		if lwt!=1 or lnw!=1 or nucs.find(wt)==-1 or nucs.find(nw)==-1 or wt==nw:
-			print >> sys.stderr, 'ERROR: Not single nucloetide variant',','.join([nchr,pos,wt,nw])
-			continue
+		#if lwt!=1 or lnw!=1 or nucs.find(wt)==-1 or nucs.find(nw)==-1 or wt==nw:
+		#	print >> sys.stderr, 'ERROR: Not single nucloetide variant',','.join([nchr,pos,wt,nw])
+		#	continue
 		if wt=='-':
 			lwt=1
 			lnw+=1
@@ -656,7 +659,8 @@ if __name__ == '__main__':
 				print >> sys.stderr,'ERROR: Input file not found',namefile
 				sys.exit(1)
 			if vcf:
-				make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
+				#make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
+				make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
 			else:
 				make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
 	else:
