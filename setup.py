@@ -78,27 +78,22 @@ def setup(arch_type,hg='all',web=False):
 	if out[0]!=0:
 		print >> sys.stderr, "ERROR: Command wget not available."
 		print sys.exit(1)
-	print '\n2) Check or compile scikit-learn-0.17 for joblib'
-	cmd='python -c \'from sklearn.externals import joblib\''
+	print '\n2) Compile and check scikit-learn-0.17 for joblib'
+        cmd='cd '+prog_dir+'/tools/; tar -xzvf scikit-learn-0.17.tar.gz;' 
+	cmd=cmd+'cd scikit-learn-0.17; python setup.py install --install-lib='+prog_dir+'/tools'
+	print 'CMD:',cmd
+        out=getstatusoutput(cmd)
+        print out[1]
+        if out[0]!=0:
+		print >> sys.stderr, "ERROR: scikit-learn istallation failed."
+                sys.exit(1)
+	cmd='cd '+prog_dir+'/tools/; python -c \'from sklearn.externals import joblib\''
 	print 'CMD:',cmd
 	out=getstatusoutput(cmd)
-	print out
+	print out[1]
 	if out[0]!=0:
-        	cmd='cd '+prog_dir+'/tools/; tar -xzvf scikit-learn-0.17.tar.gz;' 
-		cmd=cmd+'cd scikit-learn-0.17; python setup.py install --install-lib='+prog_dir+'/tools'
-		print 'CMD:',cmd
-        	out=getstatusoutput(cmd)
-        	print out[1]
-        	if out[0]!=0:
-                	print >> sys.stderr, "ERROR: scikit-learn istallation failed."
-                	sys.exit(1)	
-	        cmd='cd '+prog_dir+'/tools/; python -c \'from sklearn.externals import joblib\''
-		print 'CMD:',cmd
-		out=getstatusoutput(cmd)
-		print out[1]
-		if out[0]!=0:
-			print >> sys.stderr, "ERROR: joblib library not available."
-			sys.exit(1)
+		print >> sys.stderr, "ERROR: joblib library not available."
+		sys.exit(1)
 	print '\n3) Download UCSC Tools'
 	out=get_ucsc_tools(arch_type)
 	if out[0]!=0 and out[0]!=65280:
