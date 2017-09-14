@@ -209,6 +209,7 @@ def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg3
 		cons=get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web,win,dbpp,cprog)
 		cons_input.append(cons)
 	if pklcod!='': r_cod=get_coding_range(ichr,ipos,ucsc_exe,ucsc_dbs,pklcod)
+	print nuc,seq,seq_input,cons_input,r_cod
 	return nuc,seq,seq_input,cons_input,r_cod
 
 

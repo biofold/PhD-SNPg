@@ -12,13 +12,17 @@ def get_ucsc_tools(arch_type):
 	twobit='twoBitToFa'
 	bwg='bigWigToBedGraph'
 	prog_get='wget'
-	wtwobit=ucsc_tool+'/'+arch_type+'/'+twobit
+	if arch_type!='linux.x86_64.v287':
+		ucsc_exe=ucsc_tool+'/'+arch_type
+	else:
+		ucsc_exe=biofold_path+'/exe'
+	wtwobit=ucsc_exe+'/'+twobit
 	cmd=prog_get+' '+wtwobit+' -O '+ucsc_dir+'/exe/'+twobit+'; chmod a+x '+ucsc_dir+'/exe/'+twobit
 	print >> sys.stderr,'   Download twoBitToFa'
 	print 'CMD:',cmd
 	out=getstatusoutput(cmd)
 	print out[1]
-	wbwg=ucsc_tool+'/'+arch_type+'/'+bwg
+	wbwg=ucsc_exe+'/'+bwg
 	cmd=prog_get+' '+wbwg+' -O '+ucsc_dir+'/exe/'+bwg+'; chmod a+x '+ucsc_dir+'/exe/'+bwg
 	print >> sys.stderr,'   Download bigWigToBedGraph'
 	print 'CMD:',cmd
@@ -74,22 +78,27 @@ def setup(arch_type,hg='all',web=False):
 	if out[0]!=0:
 		print >> sys.stderr, "ERROR: Command wget not available."
 		print sys.exit(1)
-	print '\n2) Compile scikit-learn-0.17 and check joblib'
-        cmd='cd '+prog_dir+'/tools/; tar -xzvf scikit-learn-0.17.tar.gz;' 
-	cmd=cmd+'cd scikit-learn-0.17; python setup.py install --install-lib='+prog_dir+'/tools'
-	print 'CMD:',cmd
-        out=getstatusoutput(cmd)
-        print out[1]
-        if out[0]!=0:
-                print >> sys.stderr, "ERROR: scikit-learn istallation failed."
-                sys.exit(1)	
-        cmd='cd '+prog_dir+'/tools/; python -c \'from sklearn.externals import joblib\''
+	print '\n2) Check or compile scikit-learn-0.17 for joblib'
+	cmd='python -c \'from sklearn.externals import joblib\''
 	print 'CMD:',cmd
 	out=getstatusoutput(cmd)
-	print out[1]
+	print out
 	if out[0]!=0:
-		print >> sys.stderr, "ERROR: joblib library not available."
-		sys.exit(1)
+        	cmd='cd '+prog_dir+'/tools/; tar -xzvf scikit-learn-0.17.tar.gz;' 
+		cmd=cmd+'cd scikit-learn-0.17; python setup.py install --install-lib='+prog_dir+'/tools'
+		print 'CMD:',cmd
+        	out=getstatusoutput(cmd)
+        	print out[1]
+        	if out[0]!=0:
+                	print >> sys.stderr, "ERROR: scikit-learn istallation failed."
+                	sys.exit(1)	
+	        cmd='cd '+prog_dir+'/tools/; python -c \'from sklearn.externals import joblib\''
+		print 'CMD:',cmd
+		out=getstatusoutput(cmd)
+		print out[1]
+		if out[0]!=0:
+			print >> sys.stderr, "ERROR: joblib library not available."
+			sys.exit(1)
 	print '\n3) Download UCSC Tools'
 	out=get_ucsc_tools(arch_type)
 	if out[0]!=0 and out[0]!=65280:
