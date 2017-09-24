@@ -328,12 +328,13 @@ def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg
 		if nw=='-':
 			lwt+=1
 			lnw=1
-		n_wt,n_nw,n_pos=parse_variants(ochr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
+		n_wt,n_nw,n_pos=parse_variants(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web,dbfasta,fprog)
+		#print wt,nw,pos,n_wt,n_nw,n_pos
 		if n_wt=='' or n_nw=='':
 			print >> sys.stderr, 'ERROR: Incorrect mutation mapping. Check position',ichr,ipos,wt,nw
 		if 'ACGTN'.find(n_wt)==-1 or 'ACGTN'.find(n_nw)==-1:
 			print >> sys.stderr, 'ERROR: Incorrect wild-type or mutant nucleotide',wt,nw
-		(nuc,seq,seq_input,cons_input,r_cod)=get_indels_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,pklcod,dbpps,fprog,cprog)
+		(nuc,seq,seq_input,cons_input,r_cod)=get_indel_input(ichr,n_pos,n_wt,n_nw,ucsc_exe,ucsc_dbs,web,win,dbfasta,dbpps,pklcod,fprog,cprog)
 		cons_input1=cons_input[0]
 		cons_input2=cons_input[1]
 		if seq=='': 
