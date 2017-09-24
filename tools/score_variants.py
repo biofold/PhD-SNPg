@@ -319,6 +319,7 @@ def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg
 		v=line.rstrip().split(s)
 		if len(v)<4: print >> sys.stderr,'WARNING: Incorrect line ',c,line.rstrip()
 		(ichr,pos,wt,nw)=v[:4]
+		if ichr.find('chr')==-1: ichr='chr'+ichr
 		ipos=int(pos)
 		lwt=len(wt)
 		lnw=len(nw)
