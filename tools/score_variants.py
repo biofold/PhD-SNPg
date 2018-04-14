@@ -311,16 +311,21 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 	return
 
 
-def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph',vcf=False):
 	vlines=[]
 	f=open(namefile)
+	p=range(4)
+	if vcf: p=[0,1,3,4]
 	c=1
 	for line in f:
 		v=line.rstrip().split(s)
-		if len(v)<4: print >> sys.stderr,'WARNING: Incorrect line ',c,line.rstrip()
-		(ichr,pos,wt,nw)=v[:4]
+		try
+			(ichr,pos,wt,nw)=(v[p[0]],v[p[1]],v[p[2]],v[p[3]])
+			ipos=int(pos)
+		except:
+			print >> sys.stderr,'WARNING: Incorrect line:',c,line.rstrip()
+			continue
 		if ichr.find('chr')==-1: ichr='chr'+ichr
-		ipos=int(pos)
 		lwt=len(wt)
 		lnw=len(nw)
 		if wt=='-':
