@@ -347,8 +347,13 @@ def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg
 			print >> sys.stderr, 'WARNING: Sequence not found for line',c,ichr,pos
 		if seq_input==[]:
 			print >> sys.stderr, 'WARNING: Incorrect nucleotide in line '+str(c)+'. Genome location:',ichr,pos
-		if cons_input1==[] or cons_input2==[]:
-			print >> sys.stderr, 'WARNING: Incorrect conservation data in line',c,ichr,pos
+			continue
+		if cons_input2==[]:                        
+			print >> sys.stderr, 'ERROR: Incorrect conservation data in line',c,ichr,pos
+			continue
+		if cons_input1==[]:
+			cons_input1=[0.0 for i in range(2*win+1)]
+			print >> sys.stderr,'WARNING: PhyloP7 data not found for line',c,ichr,pos
 		p_cod=0
 		if r_cod!=[]: p_cod=1
 		vlines.append([v,seq,seq_input,cons_input1,cons_input2,[lwt,lnw,p_cod]])
