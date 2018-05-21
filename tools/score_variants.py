@@ -321,7 +321,7 @@ def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg
 	for line in f:
 		v=line.rstrip().split(s)
 		if len(v)<=mp or line[0]=='#': continue
-		try
+		try:
 			(ichr,pos,wt,nw)=(v[p[0]],v[p[1]],v[p[2]],v[p[3]])
 			ipos=int(pos)
 		except:
