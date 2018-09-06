@@ -482,7 +482,7 @@ def get_options():
 	if hg=='hg19':
 		fasta=hg19['fasta']
 		dbpps=[hg19['phylop'][0],hg19['phylop'][2]]
-		pklcod=cod=hg19['coding']
+		pklcod=hg19['coding']
 	else:
 		fasta=hg38['fasta']
 		dbpps=[hg38['phylop'][0],hg38['phylop'][2]]

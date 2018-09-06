@@ -614,7 +614,7 @@ def get_options():
 	if hg=='hg19':
 		fasta=hg19['fasta']
 		dbpps=[hg19['phylop'][0],hg19['phylop'][2]]
-		pklcod=cod=hg19['coding']
+		pklcod=hg19['coding']
 		modfile = [prog_dat + '/snv_model_w5_p7_500_hg19.pkl',prog_dat + '/indel_model_w5_p7_500_hg19.pkl']
 	else:
 		fasta=hg38['fasta']
