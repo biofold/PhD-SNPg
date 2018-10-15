@@ -95,7 +95,7 @@ if __name__  == '__main__':
 		sdata,idata=get_input_data(namefile,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,vcf)
 		sdata,idata=get_input_data(namefile,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,vcf)
 		if len(idata)==0 and len(sdata)==0:
-			print sys.stderr(),'WARNING: No mutation data found. Please check your input.'
+			print >> sys.stderr,'WARNING: No mutation data found. Please check your input.'
 			sys.exit(1)
 		if len(sdata)>0: ps=pred_sdata(sdata,modfiles[0])
 		if len(idata)>0: pi=pred_idata(idata,modfiles[1])	

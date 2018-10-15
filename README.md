@@ -87,7 +87,7 @@ HOW TO RUN
         python predict_variants.py test/test_variants_hg38.tsv -g hg38
        
         vcf file with in the firt 5 columns: chr, position, rsid, ref, alt  
-        python predict_variants.py test/test_variants_hg19.vcf.gz --vcf -g hg19
+        python predict_variants.py test/test_variants_hg19.vcf --vcf -g hg19
 
 
 OUTPUT
