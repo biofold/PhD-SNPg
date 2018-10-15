@@ -58,12 +58,14 @@ def get_options():
 	#parser.add_option('-o','--output', action='store', type='string', dest='outfile', help='Output file')        
 	parser.add_option('-g','--genome', action='store', type='string', dest='hg', default='hg38', help='Genome version')
 	parser.add_option('-v','--vcf', action='store_true',dest='vcf',default=False, help='VCF input file')
+	parser.add_option('--verbose', action='store_true', dest='ver', default=False, help='Verbose mode')
 	(options, args) = parser.parse_args()
 	win=2
 	hg='hg38'
 	vcf=False
 	if options.hg:	hg=options.hg.lower()
 	if options.vcf: vcf=True
+	if options.ver: __builtin__.verbose=True
 	if len(args)==0: 
 		parser.print_help()
 		sys,exit(1)
@@ -90,9 +92,13 @@ if __name__  == '__main__':
 		dbpps=[]
 	modfiles=[ prog_dat+ '/snv_model_w5_p7_500_'+refgen+'.pkl',prog_dat + '/indel_model_w5_p7_500_'+refgen+'.pkl']
 	if dbpps!=[]:
-		sdata,idata=get_input_data(namefile,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod)
-		ps=pred_sdata(sdata,modfiles[0])
-		pi=pred_idata(idata,modfiles[1])	
+		sdata,idata=get_input_data(namefile,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,vcf)
+		sdata,idata=get_input_data(namefile,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod,vcf)
+		if len(idata)==0 and len(sdata)==0:
+			print sys.stderr(),'WARNING: No mutation data found. Please check your input.'
+			sys.exit(1)
+		if len(sdata)>0: ps=pred_sdata(sdata,modfiles[0])
+		if len(idata)>0: pi=pred_idata(idata,modfiles[1])	
 		#input_list=get_file_input(namefile,ucsc_exe,ucsc_dbs,False,2,'\t',dbfasta,dbpps,pklcod)
 		#print input_list[:9]
 
