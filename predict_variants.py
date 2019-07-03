@@ -104,7 +104,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 	return
 
 
-def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph',inputfile='prova_inputfile'):
+def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',inputfile='', fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	v_input=[]
 	try:
 		model1=joblib.load(modfile[0])
@@ -112,6 +112,7 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 	except:
 		print >> sys.stderr,'ERROR: Program not able to load modfile. Please check that you have installed a compatible version joblib.'
 		sys.exit(1)
+	fout=open(outfile,'w')
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()        
 	c=1
@@ -119,8 +120,8 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 		if line == '': continue
 		line='\t'.join(line.split())
 		if line[0]=='#':
-			if line.find('#CHROM')==0: line=line+'\tCODING\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100'
-			print line
+			if line.find('#CHROM')==0: line=line+'\tCODING\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100\n'
+			fout.write(line)
 			continue 	
 		v=line.rstrip().split('\t')
 		if len(v)<5:
@@ -210,10 +211,11 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 		#print pp100,avgpp100,cons_input2
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
-		print line+'\t'+'%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f' %(cod,c_pred[0],y_pred[0],d_fdr,pp100,avgpp100)
+		fout.write(line+'\t'+'%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f\n' %(cod,c_pred[0],y_pred[0],d_fdr,pp100,avgpp100))
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
 		v_input.append(line+'\t'+'\t'.join([str(i) for i in X[0]])+'\n')
 		c=c+1
+	f.close()
 	if inputfile!='': open(inputfile,'w').writelines(v_input)
 	return 
 
@@ -351,7 +353,8 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 	return 
 
 
-def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',inputfile='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+	v_input=[]
 	nucs='ACGTN'
 	try:
 		model1=joblib.load(modfile[0])
@@ -359,10 +362,11 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 	except:
 		print >> sys.stderr,'ERROR: Program not able to load modfile. Please check that you have installed a compatible version joblib.'
 		sys.exit(1)
+	fout=open(outfile,'w')
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()        
 	c=0
-	print "#CHROM\tPOS\tREF\tALT\tCODING\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100"
+	fout.write("#CHROM\tPOS\tREF\tALT\tCODING\tPREDICTION\tSCORE\tFDR\tPhyloP100\tAvgPhyloP100\n")
 	for line in stdout.split('\n'):
 		if line == '': continue 
 		v=line.rstrip().split()
@@ -457,8 +461,11 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 		#print pp100,avgpp100,cons_input2
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
-		print line+'\t'+'%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f' %(cod,c_pred[0],y_pred[0],d_fdr,pp100,avgpp100)
+		fout.write(line+'\t'+'%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f\n' %(cod,c_pred[0],y_pred[0],d_fdr,pp100,avgpp100))
+		v_input.append(line+'\t'+'\t'.join([str(i) for i in X[0]])+'\n')
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
+	if inputfile!='': open(inputfile,'w').writelines(v_input)
+	fout.close()
 	return 
 
 
@@ -589,13 +596,16 @@ def get_options():
 	parser = optparse.OptionParser("usage: %prog variant_file", description=desc)
 	parser.add_option('-m','--mod-file', action='store', type='string', dest='mfile', help='Model file')
 	parser.add_option('-g','--genome', action='store', type='string', dest='hg', default='hg38', help='Genome version')
+	parser.add_option('-o','--output', action='store', type='string', dest='outfile', help='Output file')
+	parser.add_option('--inputfile', action='store', type='string', dest='inputfile', help='Input file')
 	parser.add_option('-v','--verbose', action='store_true', dest='ver', default=False, help='Verbose mode')
 	parser.add_option('-c','--coordinate', action='store_true', dest='coord', default=False, help='Coordinate input')
 	parser.add_option('--vcf', action='store_true', dest='vcf', default=False, help='VCF file input')
 	parser.add_option('--web', action='store_true', dest='web', default=False, help='Use UCSC web files')
 	parser.add_option('--pass', action='store_true', dest='fpass', default=False, help='Predict only PASS variants. Check column 7 in vcf file')
 	(options, args) = parser.parse_args()
-	outfile = ''
+	outfile = '/dev/stdout'
+	inputfile = ''
 	#modfile = [prog_dir + '/data/model/snv_model_w5_p7_500.pkl',prog_dir + '/data/model/indel_model_w5_p7_500.pkl']
 	hg='hg38'
 	coord=False
@@ -603,6 +613,8 @@ def get_options():
 	fpass=False
 	web=False
 	win=2
+	if options.outfile: outfile=options.outfile
+	if options.inputfile: inputfile=options.inputfile
 	if options.mfile: modfile=options.mfile
 	if options.hg.lower()=='hg19': hg='hg19'
 	if options.coord: coord = True
@@ -625,7 +637,7 @@ def get_options():
 	if not os.path.isfile(modfile[0]) or not os.path.isfile(modfile[1]):
                 print >> sys.stderr,'ERROR: Data model files not found'
 		sys.exit(1)
-	opts=(outfile,modfile,fasta,dbpps,pklcod)
+	opts=(outfile,inputfile,modfile,fasta,dbpps,pklcod)
 	return args,opts
 
 
@@ -635,7 +647,7 @@ if __name__ == '__main__':
 	from sklearn.externals import joblib
 	from score_variants import parse_variants, get_snv_input, get_indel_input	
 	args,opts=get_options()
-	(outfile,modfile,fasta,dbpps,pklcod)=opts
+	(outfile,inputfile,modfile,fasta,dbpps,pklcod)=opts
 	ucsc_dbs=ucsc_dir+'/'+hg
 	if len(args)>0:
 		if coord: 
@@ -660,8 +672,8 @@ if __name__ == '__main__':
 				sys.exit(1)
 			if vcf:
 				#make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
-				make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
+				make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web,win,fasta,dbpps,pklcod,inputfile)
 			else:
-				make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web,win,fasta,dbpps,pklcod)
+				make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web,win,fasta,dbpps,pklcod,inputfile)
 	else:
 		print 'predict_variants.py variant_file -g hg_version'
