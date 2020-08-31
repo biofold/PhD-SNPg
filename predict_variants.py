@@ -133,7 +133,8 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=Fals
 			continue
 		(ichr,pos,rs,wt,nw)=tuple(v[:5])
 		if wt==nw or nw.find(',')>-1:
-			print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'NA','NA','NA','NA','NA','NA'])
+			print >> sys.stderr, 'ERROR: Incorrect input line.',ichr,pos,wt,nw
+			#print '\t'.join(str(i) for i in [ichr,pos,wt,nw,'NA','NA','NA','NA','NA','NA'])
 			continue
 		nchr=ichr
 		if nchr.find('chr')==-1: nchr='chr'+ichr
