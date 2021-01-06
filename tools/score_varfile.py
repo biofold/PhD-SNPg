@@ -20,7 +20,7 @@ def global_vars(refgen):
 	prog_dat=pdir+'/data/model'
 	__builtin__.prog_dat=prog_dat
 	dbfasta=refgen+'.2bit'
-	pklcod=refgen+'_coding.pkl'
+	pklcod=refgen+'_coding.bed'
 	if refgen=='hg38':                
 		dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw']
 	elif refgen=='hg19':
@@ -55,7 +55,7 @@ def get_input_data(namefile,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod):
 	return sdata,idata
 
 
-def pred_sdata(data,model,ofile):
+def pred_sdata(data,model,ofile,idata=False):
 	out=[]
 	model=joblib.load(model)
 	X=[i[2]+i[3]+i[4] for i in data]
@@ -67,11 +67,16 @@ def pred_sdata(data,model,ofile):
 			fdr=p[1][i][1]
 		#out.append(data[i][0]+[p[2][i],p[0][i],fdr,data[i][5][2],sum(data[i][5])/5])
 		out=[p[0][i],fdr,data[i][4][2],sum(data[i][4])/5]
-		ofile.write('\t'.join(data[i][0]+[p[2][i]])+'\t'+'\t'.join(['%.3f' %round(j,3) for j in out])+'\n')
+		if idata:
+			edata=data[i][2]+data[i][3]+data[i][4]+data[i][5]
+			info='\t'.join([str(i) for i in data[i][0]+edata+[p[2][i]]])
+		else:
+			info='\t'.join(data[i][0]+[p[2][i]])
+		ofile.write(info+'\t'+'\t'.join(['%.3f' %round(j,3) for j in out])+'\n')
 	return 
 
 
-def pred_idata(data,model,ofile):
+def pred_idata(data,model,ofile,idata=False):
 	out=[]
 	model=joblib.load(model)
 	X=[i[2]+i[3]+i[4]+i[5] for i in data]
@@ -83,7 +88,12 @@ def pred_idata(data,model,ofile):
 			fdr=p[1][i][3]
 		#out.append(data[i][0]+[p[2][i],p[0][i],fdr,data[i][5][2],sum(data[i][5])/5])
 		out=[p[0][i],fdr,data[i][4][2],sum(data[i][4])/5]
-		ofile.write('\t'.join(data[i][0]+[p[2][i]])+'\t'+'\t'.join(['%.3f' %round(j,3) for j in out])+'\n')
+		if idata:
+			edata=data[i][2]+data[i][3]+data[i][4]+data[i][5]
+			info='\t'.join([str(i) for i in data[i][0]+edata+[p[2][i]]])
+		else:
+			info='\t'.join(data[i][0]+[p[2][i]])		
+		ofile.write(info+'\t'+'\t'.join(['%.3f' %round(j,3) for j in out])+'\n')
 	return
 
 
@@ -93,31 +103,39 @@ def get_options():
 	parser = optparse.OptionParser("usage: [-h] [-t var_type] [-o outfile]", description=desc)
 	parser.add_option('-o','--output', action='store', type='string', dest='outfile', help='Output file')        
 	parser.add_option('-g','--genome', action='store', type='string', dest='hg', default='hg38', help='Genome version')
+	parser.add_option('-i','--input', action='store_true', dest='idata', help='Input data')
 	(options, args) = parser.parse_args()
 	win=2
 	hg='hg38'
 	outfile=''
+	idata=False
 	if options.hg:	hg=options.hg.lower()
 	if options.outfile: outfile=options.outfile
-	return args, hg, outfile, win
+	if options.idata: idata=True
+	return args, hg, outfile, idata, win
 	
 
 
 if __name__  == '__main__':
-	args, hg, outfile, win=get_options()
-	namefile=args[0]
-	refgen=hg
-	global_vars(refgen)
-	if outfile=='':
-		fout=sys.stdout
+	args, hg, outfile, idata, win=get_options()
+	if len(args)>0:
+		namefile=args[0]
+		refgen=hg
+		global_vars(refgen)
+		if outfile=='':
+			fout=sys.stdout
+		else:
+			fout=open(outfile,'w')
+		if dbpps!=[]:
+			sdata,idata=get_input_data(namefile,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod)
+			if len(idata)==0 and len(sdata)==0:
+				print >> sys.stderr,'WARNING: No mutation data found. Please check your input.'
+				sys.exit(1)
+			if len(sdata)>0: ps=pred_sdata(sdata,modfiles[0],fout,idata)
+			if len(idata)>0: pi=pred_idata(idata,modfiles[1],fout,idata)	
+		fout.close()
 	else:
-		fout=open(outfile,'w')
-	if dbpps!=[]:
-		sdata,idata=get_input_data(namefile,ucsc_exe,ucsc_dbs,win,dbfasta,dbpps,pklcod)
-		if len(idata)==0 and len(sdata)==0:
-			print >> sys.stderr,'WARNING: No mutation data found. Please check your input.'
-			sys.exit(1)
-		if len(sdata)>0: ps=pred_sdata(sdata,modfiles[0],fout)
-		if len(idata)>0: pi=pred_idata(idata,modfiles[1],fout)	
-	fout.close()
+		print >>sys.stderr,'python score_varfile.py mutfile -o output -g hg_version'
+
+
 

@@ -104,7 +104,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 	return
 
 
-def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',inputfile='', fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.bed',inputfile='', fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	v_input=[]
 	try:
 		model1=joblib.load(modfile[0])
@@ -221,7 +221,7 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=Fals
 	return 
 
 
-def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	nucs='ACGTN'
 	try:
 		model1=joblib.load(modfile[0])
@@ -354,7 +354,7 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 	return 
 
 
-def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',inputfile='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.bed',inputfile='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	v_input=[]
 	nucs='ACGTN'
 	try:
@@ -471,7 +471,7 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=Fals
 
 
 
-def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	try:
 		model1=joblib.load(modfile[0])
 		model2=joblib.load(modfile[1])
