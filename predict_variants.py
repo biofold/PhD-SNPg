@@ -216,7 +216,7 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,outfile,web=Fals
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])	
 		v_input.append(line+'\t'+'\t'.join([str(i) for i in X[0]])+'\n')
 		c=c+1
-	f.close()
+	fout.close()
 	if inputfile!='': open(inputfile,'w').writelines(v_input)
 	return 
 
