@@ -96,12 +96,12 @@ OUTPUT
         PREDICTION: Pathogenic or Benign
         SCORE: a probabilistic score between 0 and 1. If the score is >0.5 the variants is predicted to be Pathogenic.
         FDR: The false discovery rate associated to higher/lower SCORE.
-        PhyloP100: PhyloP100 in the mutated position.
-        AvgPhyloP100: Average value of PhyloP100 in a 7-nucleotide window around the mutated position.
+        PhyloP470: PhyloP470 in the mutated position.
+        AvgPhyloP470: Average value of PhyloP100 in a 5-nucleotide window around the mutated position.
 
         The scores added as extra columns to the input file. An example of output is reported below.
 
-        #CHROM  POS     REF     ALT     CODING  PREDICTION      SCORE   FDR   PhyloP100       AvgPhyloP100
+        #CHROM  POS     REF     ALT     CODING  PREDICTION      SCORE   FDR   PhyloP470       AvgPhyloP470
         1       45331676        G       A       Yes     Pathogenic      0.990   0.022   7.723   3.313
         1       237634938       G       T       Yes     Benign  0.005   0.011   -4.248  5.939
         2       26461838        G       A       Yes     Benign  0.011   0.022   -0.064  6.116
