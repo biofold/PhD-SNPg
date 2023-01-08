@@ -120,7 +120,10 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 	for line in stdout.split('\n'):
 		if line == '': continue
 		line='\t'.join(line.split())
-		if line[0]=='#':
+		if line.find('##')==0:
+			print line
+			continue
+		if line.find('#')==0:
 			if line.find('#CHROM')==0: line=line+'\tCODING\tPREDICTION\tSCORE\tFDR\t'+dat+'\tAvg'+dat
 			print line
 			continue
@@ -240,7 +243,10 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 		list_pred=[]
 		if line == '': continue
 		line='\t'.join(line.split())
-		if line[0]=='#':
+		if line.find('##')==0:
+			print line
+			continue
+		if line.find('#')==0:
 			if line.find('#CHROM')==0: line=line+'\tCODING\tPREDICTION\tSCORE\tFDR\t'+dat+'\tAvg'+dat
 			print line
 			continue
