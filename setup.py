@@ -11,6 +11,7 @@ def get_ucsc_tools(arch_type):
 	ucsc_dir = prog_dir+'/ucsc'
 	twobit='twoBitToFa'
 	bwg='bigWigToBedGraph'
+	lift='liftOver'
 	prog_get='wget'
 	if arch_type!='linux.x86_64.v287':
 		ucsc_exe=ucsc_tool+'/'+arch_type
@@ -28,6 +29,12 @@ def get_ucsc_tools(arch_type):
 	print 'CMD:',cmd
 	out=getstatusoutput(cmd)
 	print out[1]
+	wlift=ucsc_exe+'/'+lift
+	cmd=prog_get+' '+wlift+' -O '+ucsc_dir+'/exe/'+lift+'; chmod a+x '+ucsc_dir+'/exe/'+lift
+        print >> sys.stderr,'   Download liftOver'
+        print 'CMD:',cmd
+        out=getstatusoutput(cmd)
+        print out[1]
 	print >> sys.stderr,'   Test tools'
 	cmd=ucsc_dir+'/exe/twoBitToFa'
 	print 'CMD:',cmd
@@ -36,7 +43,6 @@ def get_ucsc_tools(arch_type):
 	if out[0]!=0 and out[0]!=65280:
 		print >> sys.stderr,'  ERROR: Incorrect architecture',arch_type
 		cmd='rm '+ucsc_dir+'/exe/twoBitToFa'
-		
 		return out
 	cmd=ucsc_dir+'/exe/bigWigToBedGraph'
 	print 'CMD:',cmd
@@ -45,6 +51,14 @@ def get_ucsc_tools(arch_type):
 	if out[0]!=0 and out[0]!=65280:
 		print >> sys.stderr,'  ERROR: Incorrect architecture',arch_type
 		cmd='rm '+ucsc_dir+'/exe/bigWigToBedGraph'
+		getstatusoutput(cmd)
+		return out
+        cmd=ucsc_dir+'/exe/liftOver'
+	out=getstatusoutput(cmd)
+	print out[1]
+	if out[0]!=0 and out[0]!=65280:
+		print >> sys.stderr,'  ERROR: Incorrect architecture',arch_type
+		cmd='rm '+ucsc_dir+'/exe/liftOver'
 		getstatusoutput(cmd)
 		return out
 	print >> sys.stderr,'   Downloaded UCSC Tools'
@@ -169,7 +183,8 @@ def test(hg='all',web=False):
 			ucsc_path+'/hg19/phyloP100way/hg19.100way.phyloP100way.bw'],\
 			'hg38':[ ucsc_path+'/hg38/bigZips/hg38.2bit', \
 			ucsc_path+'/hg38/phyloP7way/hg38.phyloP7way.bw',\
-			ucsc_path+'/hg38/phyloP100way/hg38.phyloP100way.bw']}
+			ucsc_path+'/hg38/phyloP100way/hg38.phyloP100way.bw',\
+			ucsc_path+'/hg38/phyloP470way/hg38.phyloP470way.bw']}
 		for ihg in hgs:
 			for hgfile in dhg[ihg]:
 				cmd='curl --head -s '+hgfile
@@ -226,7 +241,24 @@ def test(hg='all',web=False):
 			print >> sys.stderr,'ERROR: bigWigToBedGraph not working with',ihg
 			sys.exit(1)
 
-	print '\n6) Test predict_variants.py'
+	print '\n6) Test liftOver command'
+	if hgs!=['hg38']:
+		if web:
+			lift=ucsc_path+'/hg19/liftOver/hg19ToHg38.over.chain.gz'
+		else:
+			lift=ucsc_dir+'/hg19/hg19ToHg38.over.chain.gz'
+		cmd='echo -e "chr1\t10042375\t10042376" >/tmp/liftgff;'+ucsc_tool+'/liftOver /tmp/liftgff '+lift+' /dev/stdout /dev/stderr; rm /tmp/liftgff'
+		print 'CMD:',cmd
+		out=getstatusoutput(cmd)
+		print out[1]
+		if out[0]!=0:
+			print >> sys.stderr,'ERROR: liftOver not working'
+			sys.exit(1)
+
+	if hgs!=['hg38']:
+		print '\n6) Test predict_variants.py'
+	else:
+		print '\n7) Test predict_variants.py'
 	for ihg in hgs:
 		if web:
 			cmd='python predict_variants.py test/test_short_variants_'+ihg+'.tsv -g '+ihg+' --web '
