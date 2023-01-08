@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 import os, sys, subprocess, pickle
 import  __builtin__
 from commands import getstatusoutput
@@ -235,7 +233,7 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()
 	dat='PhyloP470'
-	if dbpps[-1].find('phyloP100way')>-1: dat='PhyloP100'
+	if vyear=='2017': dat='PhyloP100'
 	c=0
 	#print '#CHROM\tPOS\tID\tREF\tALT\tCODING\tPREDICTION\tSCORE\tFDR\t'+dat+'\tAvg'+dat
 	for line in stdout.split('\n'):
@@ -365,10 +363,10 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 	dat='PhyloP470'
 	if dbpps[-1].find('phyloP100way')>-1: dat='PhyloP100'
 	v_input=[]
-	if 1==1:
+	try:
 		model1=joblib.load(modfile[0])
 		model2=joblib.load(modfile[1])
-	else:
+	except:
 		print >> sys.stderr,'ERROR: Program not able to load modfile. Please check that you have installed a compatible version joblib.'
 		sys.exit(1)
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
