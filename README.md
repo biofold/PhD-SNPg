@@ -54,21 +54,23 @@ MANUAL INSTALLATION
           python setup.py install --install-lib=..
           
       3) Required UCSC tools and data:
-        - bigWigToBedGraph and twoBitToFa from
+        - bigWigToBedGraph, twoBitToFa and liftOver from
           http://hgdownload.cse.ucsc.edu/admin/exe
           in ucsc/exe directory
 
         - For hg19 based predictions:
           hg19.2bit: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit
-          hg19.phyloP46way.primate.bw http://snps.biofold.org/PhD-SNPg/ucsc/hg19/hg19.phyloP46way.primate.bw	
+          hg19.phyloP46way.primate.bw: http://snps.biofold.org/PhD-SNPg/ucsc/hg19/hg19.phyloP46way.primate.bw	
           hg19.100way.phyloP100way.bw: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/phyloP100way/hg19.100way.phyloP100way.bw
+          hg19ToHg38.over.chain.gz: https://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/hg19ToHg38.over.chain.gz
           in ucsc/hg19 directory
           Alterantively hg19 bundle is available at http://snps.biofold.org/PhD-SNPg/ucsc/hg19.tar.gz		
 
         - For hg38 based predictions:
           hg38.2bit: http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit
-          hg38.phastCons7way.bw http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phastCons7way/hg38.phastCons7way.bw
-          hg38.phastCons100way.bw http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phastCons100way/hg38.phastCons100way.bw
+          hg38.phyloP7way.bw:  http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phyloP7way/hg38.phyloP7way.bw
+          hg38.phyloP100way.bw:  http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phyloP100way/hg38.phyloP100way.bw
+          hg38.phyloP470way.bw:  http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phyloP470way/hg38.phyloP470way.bw
           in ucsc/hg38 directory
           Alterantively hg38 bundle is available at http://snps.biofold.org/PhD-SNPg/ucsc/hg38.tar.gz
 
@@ -77,9 +79,6 @@ HOW TO RUN
 		
       PhD-SNPg can take in input a single variation or a file containing multiple single nucleotide variants.
       For web installation append --web at the of all commands.
-
-      - For single variants use the option -c:
-        python predict_variants.py chr7,158715219,A,G -g hg19 -c
 
       - For input file the input can be either: 
 	
