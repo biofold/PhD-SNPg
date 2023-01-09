@@ -33,8 +33,7 @@ def global_vars():
 def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	lwt=len(wt)
 	lnw=len(nw)
-	dat='PhyloP470'
-	if vyear=='2017': dat='PhyloP100'
+	dat='PhyloP100'
 	if wt=='-':
 		lwt=1
 		lnw+=1
@@ -96,8 +95,12 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 		print '\t'.join([str(i) for i in [ichr,ipos,wt,nw] ])+'\tNA\tNA\tNA\tNA\tNA\tNA'
 	else:
 		print '#CHROM\tPOS\tREF\tALT\tCODING\tPREDICTION\tSCORE\tFDR\t'+dat+'\tAvg'+dat
-		pp100=cons_input2[win]
-		avgpp100=sum(cons_input2)/float(len(cons_input2))
+		if vyear=='2017':
+			pp100=cons_input2[win]
+			avgpp100=sum(cons_input2)/float(len(cons_input2))
+		else:
+			pp100=cons_input1[win]
+			avgpp100=sum(cons_input1)/float(len(cons_input1))
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
 		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,cod,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,'%.3f' %pp100,'%.3f' %avgpp100])
@@ -114,8 +117,7 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 		sys.exit(1)
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()
-	dat='PhyloP470'
-	if vyear=='2017': dat='PhyloP100'
+	dat='PhyloP100'
 	c=1
 	for line in stdout.split('\n'):
 		if line == '': continue
@@ -211,8 +213,12 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 			print >> sys.stderr, 'WARNING:',line
 			#print line+'\tNA\tNA\tNA\tNA\tNA'
 			continue
-		pp100=cons_input2[win]
-		avgpp100=sum(cons_input2)/float(len(cons_input2))
+		if vyear=='2017':
+			pp100=cons_input2[win]
+			avgpp100=sum(cons_input2)/float(len(cons_input2))
+		else:
+			pp100=cons_input1[win]
+                        avgpp100=sum(cons_input1)/float(len(cons_input1))
 		#print pp100,avgpp100,cons_input2
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
@@ -235,8 +241,7 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 	list_pred=[]
 	proc = subprocess.Popen([prog_cat,'-f',namefile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = proc.communicate()
-	dat='PhyloP470'
-	if vyear=='2017': dat='PhyloP100'
+	dat='PhyloP100'
 	c=0
 	#print '#CHROM\tPOS\tID\tREF\tALT\tCODING\tPREDICTION\tSCORE\tFDR\t'+dat+'\tAvg'+dat
 	for line in stdout.split('\n'):
@@ -345,8 +350,12 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 				print >> sys.stderr, 'WARNING:', line
 				#list_pred.append(5*['NA'])
 				continue
-			pp100=cons_input2[win]
-			avgpp100=sum(cons_input2)/float(len(cons_input2))
+			if vyear=='2017':	
+				pp100=cons_input2[win]
+				avgpp100=sum(cons_input2)/float(len(cons_input2))
+			else:
+				pp100=cons_input1[win]
+				avgpp100=sum(cons_input1)/float(len(cons_input1))
 			if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 			if c_pred[0] == "Benign": d_fdr=v_fdr[1]
 			list_pred.append(['%s' %cod,'%s' %c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,'%.3f' %pp100,'%.3f' %avgpp100])
@@ -365,8 +374,7 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 
 def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP100way.bw','hg38.phyloP470way.bw'],pklcod='hg38_coding.pkl',fprog='twoBitToFa',cprog='bigWigToBedGraph',sep='@'):
 	nucs='ACGTN'
-	dat='PhyloP470'
-	if dbpps[-1].find('phyloP100way')>-1: dat='PhyloP100'
+	dat='PhyloP100'
 	v_input=[]
 	try:
 		model1=joblib.load(modfile[0])
@@ -467,8 +475,12 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 			print >> sys.stderr,'WARNING: Variant not scored. Check modfile and input'
 			print >> sys.stderr, 'WARNING:', line
 			continue
-		pp100=cons_input2[win]
-		avgpp100=sum(cons_input2)/float(len(cons_input2))
+		if vyear=='2017':
+			pp100=cons_input2[win]
+			avgpp100=sum(cons_input2)/float(len(cons_input2))
+		else:
+			pp100=cons_input1[win]
+			avgpp100=sum(cons_input1)/float(len(cons_input1))
 		#print pp100,avgpp100,cons_input2
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
@@ -488,8 +500,7 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='
 		sys.exit(1)
 	f=open(namefile)
 	c=1
-	dat='PhyloP470'
-	if dbpps[-1].find('phyloP100way')>-1: dat='PhyloP100'
+	dat='PhyloP100'
 	print "#CHROM\tPOS\tREF\tALT\tCODING\tPREDICTION\tSCORE\tFDR\t'+dat+'\tAvg"+dat
 	for line in f:
 		v=line.rstrip().split(s)
@@ -569,8 +580,12 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='
 			print >> sys.stderr,'WARNING: Variant not scored. Check modfile and input'
 			print >> sys.stderr, 'WARNING:', line
 			continue
-		pp100=cons_input2[win]
-		avgpp100=sum(cons_input2)/float(len(cons_input2))
+		if vyear=='2017':
+			pp100=cons_input2[win]
+			avgpp100=sum(cons_input2)/float(len(cons_input2))
+		else:
+			pp100=cons_input1[win]
+			avgpp100=sum(cons_input1)/float(len(cons_input1))
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
 		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,cod,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,pp100,avgpp100])
