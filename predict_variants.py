@@ -629,6 +629,9 @@ def liftover(filein,fileout,sep='@'):
 	for line in f:
 		v=line.rstrip().split()
 		t=v[3].split(sep)
+		if len(t)<4:
+			print >> sys.stderr,"ERROR: Incorrect mapping of",v[3]
+			continue
 		if line.find('chr')==0: v[0]=v[0][3:]
 		if vcf:
 			vout.append('\t'.join(v[:2])+'\t.\t'+t[3]+'\t'+t[4]+'\t'+v[3]+'\n')
