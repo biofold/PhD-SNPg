@@ -91,21 +91,20 @@ HOW TO RUN
 
 OUTPUT
 
-      PhD-SNPg returns in output: 
+      PhD-SNPg returns in output:
 
         PREDICTION: Pathogenic or Benign
         SCORE: a probabilistic score between 0 and 1. If the score is >0.5 the variants is predicted to be Pathogenic.
         FDR: The false discovery rate associated to higher/lower SCORE.
-        PhyloP470: PhyloP470 in the mutated position.
-        AvgPhyloP470: Average value of PhyloP470 in a 5-nucleotide window around the mutated position.
+        PhyloP100: PhyloP100 in the mutated position.
+        AvgPhyloP100: Average value of PhyloP100 in a 5-nucleotide window around the mutated position.
 
         The scores added as extra columns to the input file. An example of output is reported below.
 
-        #CHROM  POS     REF     ALT     CODING  PREDICTION      SCORE   FDR   PhyloP470       AvgPhyloP470
-        1       45331676        G       A       Yes     Pathogenic      0.990   0.022   7.723   3.313
-        1       237634938       G       T       Yes     Benign  0.005   0.011   -4.248  5.939
-        2       26461838        G       A       Yes     Benign  0.011   0.022   -0.064  6.116
-        2       166009835       A       G       Yes     Benign  0.176   0.072   0.591   4.188
-        2       174753570       G       C       Yes     Pathogenic      0.777   0.087   -1.937  5.439
-        5       44305045        G       A       Yes     Pathogenic      0.985   0.026   1.655   3.964
-
+        #CHROM  POS     REF     ALT     CODING  PREDICTION      SCORE   FDR   PhyloP100       AvgPhyloP100
+        1       197125161       C       T        Yes    Pathogenic      0.954   0.024   7.361   4.082
+        2       31526225        G       A        Yes    Pathogenic      0.792   0.061   1.911   2.799
+        3       46998228        T       G        No     Pathogenic      0.990   0.007   7.762   5.511
+        4       663761          C       G        No     Benign  0.269   0.068   -0.211  -0.410
+        5       74750639        C       T        Yes    Benign  0.006   0.004   -0.074  5.880
+        11      121125583       A       G        Yes    Benign  0.001   0.003   -9.071  2.506
