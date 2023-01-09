@@ -97,7 +97,7 @@ OUTPUT
         SCORE: a probabilistic score between 0 and 1. If the score is >0.5 the variants is predicted to be Pathogenic.
         FDR: The false discovery rate associated to higher/lower SCORE.
         PhyloP470: PhyloP470 in the mutated position.
-        AvgPhyloP470: Average value of PhyloP100 in a 5-nucleotide window around the mutated position.
+        AvgPhyloP470: Average value of PhyloP470 in a 5-nucleotide window around the mutated position.
 
         The scores added as extra columns to the input file. An example of output is reported below.
 
