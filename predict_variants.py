@@ -593,7 +593,6 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
 		if ipos!=n_pos: cod=cod+'('+n_wt+str(n_pos)+n_nw+')'
-		
 		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,cod,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,pp100,avgpp100])
 	return
 
