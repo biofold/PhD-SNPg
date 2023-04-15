@@ -103,6 +103,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 			avgpp100=sum(cons_input1)/float(len(cons_input1))
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
+		if ipos!=n_pos: cod=cod+'('+n_wt+str(n_pos)+n_nw+')'
 		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,cod,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,'%.3f' %pp100,'%.3f' %avgpp100])
 	return
 
@@ -222,6 +223,7 @@ def make_vcffile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 		#print pp100,avgpp100,cons_input2
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
+		if ipos!=n_pos: cod=cod+'('+n_wt+str(n_pos)+n_nw+')'
 		print line+'\t'+'%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f' %(cod,c_pred[0],y_pred[0],d_fdr,pp100,avgpp100)
 		v_input.append(line+'\t'+'\t'.join([str(i) for i in X[0]])+'\n')
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])
@@ -358,6 +360,7 @@ def make_vcffile_multialleles_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web
 				avgpp100=sum(cons_input1)/float(len(cons_input1))
 			if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 			if c_pred[0] == "Benign": d_fdr=v_fdr[1]
+			if ipos!=n_pos: cod=cod+'('+n_wt+str(n_pos)+n_nw+')'
 			list_pred.append(['%s' %cod,'%s' %c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,'%.3f' %pp100,'%.3f' %avgpp100])
 		#print list_pred
 		if len(list_pred)!=len(list_nw):
@@ -484,6 +487,7 @@ def make_tsvfile_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,
 		#print pp100,avgpp100,cons_input2
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
+		if ipos!=n_pos: cod=cod+'('+n_wt+str(n_pos)+n_nw+')'
 		if hg == 'hg19': line=v[4].replace(sep,'\t')
 		print line+'\t'+'%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f' %(cod,c_pred[0],y_pred[0],d_fdr,pp100,avgpp100)
 		#print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,'%.4f' %y_pred[0]])
@@ -588,6 +592,8 @@ def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='
 			avgpp100=sum(cons_input1)/float(len(cons_input1))
 		if c_pred[0] == "Pathogenic": d_fdr=v_fdr[0]
 		if c_pred[0] == "Benign": d_fdr=v_fdr[1]
+		if ipos!=n_pos: cod=cod+'('+n_wt+str(n_pos)+n_nw+')'
+		
 		print '\t'.join(str(i) for i in [ichr,ipos,wt,nw,cod,c_pred[0],'%.3f' %y_pred[0],'%.3f' %d_fdr,pp100,avgpp100])
 	return
 
