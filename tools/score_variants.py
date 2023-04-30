@@ -15,7 +15,7 @@ def global_vars():
         biofold = 'http://snps.biofold.org/PhD-SNPg/ucsc'
         ucsc_web = {'hg19.2bit':ucsc+'/hg19/bigZips','hg38.2bit':ucsc+'/hg38/bigZips',\
 		'hg19.phyloP46way.primate.bw':biofold+'/hg19','hg19.phyloP46way.placental.bw':biofold+'/hg19','hg19.100way.phyloP100way.bw':ucsc+'/hg19/phyloP100way',\
-		'hg38.phyloP7way.bw':ucsc+'/hg38/phyloP7way','hg38.phyloP20way.bw':ucsc+'/hg38/phyloP20way','hg38.phyloP100way.bw':ucsc+'/hg38/phyloP100way'}
+		'hg38.phyloP7way.bw':ucsc+'/hg38/phyloP7way','hg38.phyloP20way.bw':ucsc+'/hg38/phyloP20way','hg38.phyloP100way.bw':ucsc+'/hg38/phyloP100way','hg38.phyloP470way.bw':ucsc+'/hg38/phyloP470way'}
 	sys.path.insert(0,tool_dir)
 	hg19={}
 	hg19['fasta']='hg19.2bit'
@@ -24,7 +24,7 @@ def global_vars():
 	hg19['coding']='hg19_coding.bed'
 	hg38={}
 	hg38['fasta']='hg38.2bit'
-	hg38['phylop']=['hg38.phyloP7way.bw','hg38.phyloP20way.bw','hg38.phyloP100way.bw']
+	hg38['phylop']=['hg38.phyloP7way.bw','hg38.phyloP100way.bw','hg38.phyloP470way.bw']
 	hg38['phastc']=['hg38.phastCons7way.bw', 'hg38.phastCons20way.bw', 'hg38.phastCons100way.bw']
 	hg38['coding']='hg38_coding.bed'
 	return
@@ -176,7 +176,7 @@ def get_fconservation(ichr,ipos,ucsc_exe,ucsc_dbs,web=False,win=2,dbname='hg38.p
         return cons
 
 
-def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP100way.bw','hg38.phyloP470way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	# for 0 starting genome
 	nuc=''
 	seq=''
@@ -193,7 +193,7 @@ def get_phdsnp_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='
 	return nuc,seq,seq_input,cons_input1,cons_input2
 
 
-def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP100way.bw','hg38.phyloP470way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	# for 0 starting genome
 	nuc=''
 	seq=''
@@ -212,7 +212,7 @@ def get_snv_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg3
 	return nuc,seq,seq_input,cons_input,r_cod
 
 
-def get_indel_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def get_indel_input(ichr,ipos,wt,nw,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP100way.bw','hg38.phyloP470way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	# for 0 starting genome        
 	nuc=''
 	seq=''
@@ -245,7 +245,7 @@ def get_coding_range(ichr,ipos,ucsc_exe,ucsc_dbs,pklcod):
 	return r_cod	
 
 
-def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,dbfasta='hg38.2bit',dbpps=['hg38.phyloP100way.bw','hg38.phyloP470way.bw'],pklcod='',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	lwt=len(wt)
 	lnw=len(nw)
 	if wt=='-':
@@ -312,7 +312,7 @@ def make_prediction(ichr,ipos,wt,nw,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,db
 	return
 
 
-def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph',vcf=False):
+def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP100way.bw','hg38.phyloP470way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph',vcf=False):
 	vlines=[]
 	f=open(namefile)
 	p=range(4)
@@ -364,7 +364,7 @@ def get_file_input(namefile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg
 	return vlines
 		
 
-def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP7way.bw','hg38.phyloP100way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
+def make_file_predictions(namefile,modfile,ucsc_exe,ucsc_dbs,web=False,win=2,s='\t',dbfasta='hg38.2bit',dbpps=['hg38.phyloP100way.bw','hg38.phyloP470way.bw'],pklcod='hg38_coding.bed',fprog='twoBitToFa',cprog='bigWigToBedGraph'):
 	try:
 		model1=joblib.load(modfile[0])
 		model2=joblib.load(modfile[1])
@@ -487,7 +487,7 @@ def get_options():
 		pklcod=hg19['coding']
 	else:
 		fasta=hg38['fasta']
-		dbpps=[hg38['phylop'][0],hg38['phylop'][2]]
+		dbpps=[hg38['phylop'][1],hg38['phylop'][2]]
 		#dbpps=hg38['phylop']+hg38['phastc']
 		pklcod=hg38['coding']
 	opts=(outfile,modfile,web,win,hg,fasta,dbpps,pklcod)
