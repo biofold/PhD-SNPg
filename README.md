@@ -39,7 +39,7 @@ INSTALLATION
         python2 setup.py test
 
       For web installation:
-        python2 setup.py test --web
+        python2 setup.py install --web
 
 
 MANUAL INSTALLATION

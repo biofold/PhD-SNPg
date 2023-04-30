@@ -291,7 +291,7 @@ def get_options():
 		print '  cmd: install or test'
 		print '  arch_type: linux.x86_64, linux.x86_64.v287, macOSX.x86_64, etc'
 		print '  -g = hg: all, hg19, hg38'
-		print '  -web = not download file'
+		print '  --web = not download file'
 		sys.exit(0)
 	return args,hg,web
 
