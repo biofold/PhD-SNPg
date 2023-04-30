@@ -15,18 +15,20 @@ INSTALLATION
       wget, curl, zcat, scikit-learn.
 
       Run:
-        python setup.py install arch_typ
+        python2 setup.py install arch_typ
 
       For Linux 64bit architecture there are two compiled versions:
         - linux.x86_64
-        - linux.x86_64.v287
+        - linux.x86_64.v369
+        - linux.x86_64.v385
+        - macOSX.arm64
         - macOSX.x86_64
 
       Installation time depends on the network speed.
       About 30G UCSC files need to be downloaded.
 
       For light installation:
-        python setup.py install arch_typ --web
+        python2 setup.py install arch_typ --web
 
       With the web_install option the PhD-SNPg
       runs without downloading the UCSC data.
@@ -34,10 +36,10 @@ INSTALLATION
       on the network speed.
 
       Test:
-        python setup.py test
+        python2 setup.py test
 
       For web installation:
-        python setup.py test --web
+        python2 setup.py test --web
 
 
 MANUAL INSTALLATION
@@ -45,13 +47,13 @@ MANUAL INSTALLATION
       1) Download PhD-SNPg script from github
         - git clone https://github.com/biofold/PhD-SNPg.git
 
-      2) Required python library: scikit-learn-0.17
+      2) Required python2 library: scikit-learn-0.17
           It is available in tools directory or at
           https://pypi.python.org/simple/scikit-learn/
 
 	- Untar the scikit-learn-0.17.tar.gz 
           move in the directory and run
-          python setup.py install --install-lib=..
+          python2 setup.py install --install-lib=..
           
       3) Required UCSC tools and data:
         - bigWigToBedGraph, twoBitToFa and liftOver from
@@ -83,10 +85,10 @@ HOW TO RUN
       - For input file the input can be either: 
 	
         plain tab separated file with 4 columns: chr, position, ref, alt
-        python predict_variants.py test/test_variants_hg38.tsv -g hg38
+        python2 predict_variants.py test/test_variants_hg38.tsv -g hg38
        
         vcf file with in the firt 5 columns: chr, position, rsid, ref, alt  
-        python predict_variants.py test/test_variants_hg19.vcf --vcf -g hg19
+        python2 predict_variants.py test/test_variants_hg19.vcf --vcf -g hg19
 
 
 OUTPUT
